@@ -1,6 +1,6 @@
 {
-  "name": "CreativeFlow Uploader",
-  "short_name": "Uploader",
+  "name": "FlowReview",
+  "short_name": "FlowReview",
   "description": "Send clients a private link to your edit and get notes pinned to exact moments.",
   "start_url": "/",
   "scope": "/",

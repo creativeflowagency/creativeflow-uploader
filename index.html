@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>CreativeFlow Uploader | Video review for editors and their clients</title>
+<title>FlowReview | Video review for editors and their clients</title>
 <meta name="description" content="Upload your edit, send your client a private link, and get notes pinned to the exact moment in the video. Versions and approvals included. Free to start.">
 <link rel="canonical" href="https://uploader.creativeflow.media/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="CreativeFlow Uploader">
-<meta property="og:title" content="CreativeFlow Uploader: client feedback, pinned to the exact frame">
+<meta property="og:site_name" content="FlowReview">
+<meta property="og:title" content="FlowReview: client feedback, pinned to the exact frame">
 <meta property="og:description" content="Upload your edit, send a private link, get timestamped notes and a clear approval. No client account needed.">
 <meta property="og:url" content="https://uploader.creativeflow.media/">
 <meta property="og:image" content="https://uploader.creativeflow.media/icon-512.png">
@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0e0f13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Uploader">
+<meta name="apple-mobile-web-app-title" content="FlowReview">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -37,7 +37,7 @@
   .topnav{ display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; }
   .brand{ display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; }
   .brand img{ height: 32px; width: 32px; }
-  .brand-name{ font-weight: 700; font-size: 16px; letter-spacing: -0.03em; color: #fff; white-space: nowrap; }
+  .brand-name{ font-weight: 800; font-size: 19px; letter-spacing: -0.03em; color: #fff; white-space: nowrap; }
   .brand-name span{ color: var(--accent-ink); }
   .navlinks{ display: flex; align-items: center; gap: 22px; }
   .navlinks a, .navlinks button.link{ font: 500 14.5px var(--font); color: var(--text-dim); text-decoration: none; white-space: nowrap; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -144,7 +144,7 @@
   /* ================= App shell (editor) ================= */
   .shell{ display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; }
   .sidebar{ position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--ink-2); border-right: 1px solid var(--line); padding: 14px 12px; padding-top: max(14px, env(safe-area-inset-top)); }
-  .sb-brand{ display: flex; align-items: center; gap: 9px; padding: 4px 6px 16px; font-weight: 800; letter-spacing: -0.03em; font-size: 15px; text-decoration: none; }
+  .sb-brand{ display: block; padding: 4px 8px 16px; font-weight: 800; letter-spacing: -0.035em; font-size: 19px; text-decoration: none; }
   .sb-brand img{ width: 28px; height: 28px; }
   .sb-brand span{ color: var(--accent-ink); }
   .sb-new{ margin-bottom: 14px; }
@@ -241,7 +241,7 @@
 <!-- ================= Landing (signed out) ================= -->
 <div class="lp" id="landing" hidden>
   <header class="site-header"><div class="wrap"><nav class="topnav">
-    <a class="brand" href="/"><img src="/favicon.png" alt="" width="32" height="32"><span class="brand-name">CreativeFlow <span>Uploader</span></span></a>
+    <a class="brand" href="/" aria-label="FlowReview home"><span class="brand-name">Flow<span>Review</span></span></a>
     <div class="navlinks">
       <a class="hide-sm" href="#features">Features</a>
       <a class="hide-sm" href="#pricing">Pricing</a>
@@ -283,7 +283,7 @@
   <section class="paper" id="features"><div class="wrap">
     <div class="split">
       <h2 class="sec-title">Feedback in one place, not five.</h2>
-      <p class="sec-copy">Notes in emails, texts, DMs and voice memos. "The bit near the end." "Can we change the thing?" You lose hours just working out what the client meant. Uploader puts every note on the frame it's about.</p>
+      <p class="sec-copy">Notes in emails, texts, DMs and voice memos. "The bit near the end." "Can we change the thing?" You lose hours just working out what the client meant. FlowReview puts every note on the frame it's about.</p>
     </div>
     <div class="feat-grid">
       <div class="feat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Timestamped comments</h3><p>Your client pauses and types. The note lands on that exact second and shows on the timeline, so you jump straight to it.</p></div>
@@ -327,13 +327,13 @@
 
   <section class="cta-sec"><div class="wrap"><div class="cta-card">
     <h2>Stop chasing feedback. Start shipping edits.</h2>
-    <p>Send your next cut with Uploader and get notes you can actually act on.</p>
+    <p>Send your next cut with FlowReview and get notes you can actually act on.</p>
     <button class="btn big" type="button" data-signup>Start free</button>
   </div></div></section>
 
   <footer class="site-footer"><div class="wrap">
     <div class="footer-top">
-      <div><div class="footer-brand">CreativeFlow Uploader</div>
+      <div><div class="footer-brand">Flow<span style="color:var(--accent-ink)">Review</span></div>
         <p class="footer-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Your videos stay private, only shared through the links you send.</p></div>
       <div class="footer-col"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><button type="button" data-signin>Sign in</button></div>
       <div class="footer-col"><h4>CreativeFlow</h4><a href="https://creativeflow.media/agency/">Agency</a><a href="https://creativeflow.media/app/">App</a><a href="https://creativeflow.media/newsletter/">Newsletter</a></div>
@@ -348,7 +348,7 @@
 
 <div class="shell" id="app" hidden>
   <aside class="sidebar" id="sidebar">
-    <a class="sb-brand" href="#"><img src="/favicon.png" alt="" width="28" height="28">CreativeFlow <span>Uploader</span></a>
+    <a class="sb-brand" href="#" aria-label="FlowReview">Flow<span>Review</span></a>
     <button class="btn block sb-new" type="button" data-new></button>
     <nav class="sb-nav" id="sbNav"></nav>
     <div class="sb-label">Reviews</div>
@@ -688,7 +688,7 @@
     if (st.open !== id) return;
     st.project = r.project; st.comments = r.comments;
     var p = st.project;
-    $('dTitle').textContent = p.title; document.title = p.title + ' | Uploader';
+    $('dTitle').textContent = p.title; document.title = p.title + ' | FlowReview';
     $('dSub').textContent = [p.client, p.versions.length ? p.versions.length + ' version' + (p.versions.length === 1 ? '' : 's') : 'No video yet'].filter(Boolean).join(' · ');
     $('dStatus').hidden = false; $('dStatus').className = 'pill ' + p.status; $('dStatus').textContent = CF.STATUS[p.status] || p.status;
     $('mView').href = link(p);
@@ -701,7 +701,7 @@
   function close() {
     st.open = null; st.project = null;
     if (player) player.unload();
-    $('rvView').hidden = true; $('app').hidden = false; document.title = 'CreativeFlow Uploader';
+    $('rvView').hidden = true; $('app').hidden = false; document.title = 'FlowReview';
     load();
   }
   $('back').addEventListener('click', function () { go(''); });

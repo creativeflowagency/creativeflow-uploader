@@ -1,4 +1,4 @@
-// CreativeFlow Uploader: shared helpers and the review player (custom controls with the
+// FlowReview: shared helpers and the review player (custom controls with the
 // comments drawn on the timeline as avatars). Used by the editor app and the client page.
 (function () {
   'use strict';
