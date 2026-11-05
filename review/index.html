@@ -2,287 +2,261 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Review | CreativeFlow Uploader</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0e0f13">
-<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
 <style>
-  :root{
-    --ink: #0e0f13; --ink-2: #17181f; --ink-3: #1f2029;
-    --text: #f3f2ee; --text-dim: #b4b3bb; --muted: #8e8d96;
-    --line: rgba(255,255,255,0.10); --line-strong: rgba(255,255,255,0.18);
-    --accent: #5c2fe0; --accent-hover: #4c22c9; --accent-ink: #c9c0ff; --mark: #8b6cff;
-    --good: #57d9a3; --warn: #f2c94c;
-    --font: "Plus Jakarta Sans", "Segoe UI", Helvetica, Arial, sans-serif;
-  }
-  *{ box-sizing: border-box; }
-  html, body{ margin: 0; background: var(--ink); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: clip; }
-  [hidden]{ display: none !important; }
-  a{ color: var(--accent-ink); }
-  button{ font-family: inherit; }
-  header.top{ position: sticky; top: 0; z-index: 20; background: var(--ink); border-bottom: 1px solid var(--line); }
-  .bar{ max-width: 1280px; margin: 0 auto; padding: 12px max(18px, env(safe-area-inset-left)); display: flex; align-items: center; gap: 14px; }
-  .brand{ display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; font-weight: 700; letter-spacing: -0.03em; }
-  .brand img{ width: 30px; height: 30px; }
-  .crumb{ min-width: 0; flex: 1; display: flex; align-items: center; gap: 10px; }
-  .crumb h1{ margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .status{ flex: none; font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--text-dim); }
-  .status.approved{ background: rgba(87,217,163,0.16); color: var(--good); }
-  .status.changes{ background: rgba(242,201,76,0.16); color: var(--warn); }
-  .who{ font-size: 13px; color: var(--text-dim); white-space: nowrap; }
-  .who button{ background: none; border: 0; color: var(--accent-ink); cursor: pointer; font-size: 13px; padding: 0; }
-  main{ max-width: 1280px; margin: 0 auto; padding: 20px max(18px, env(safe-area-inset-left)) 40px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
-  .versions{ display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .versions button{ padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line-strong); background: transparent; color: var(--text-dim); font-weight: 600; font-size: 13px; cursor: pointer; }
-  .versions button[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: #fff; }
-  .player{ position: relative; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-strong); aspect-ratio: 16 / 9; }
-  .player video{ width: 100%; height: 100%; display: block; background: #000; }
-  .marks{ position: relative; height: 22px; margin: 10px 2px 0; }
-  .marks .track{ position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--line-strong); border-radius: 2px; }
-  .marks button{ position: absolute; top: 3px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; border: 2px solid var(--ink); background: var(--mark); cursor: pointer; padding: 0; }
-  .marks button.done{ background: #4a4b55; }
-  .marks button:hover, .marks button:focus-visible{ transform: scale(1.25); outline: none; }
-  .compose{ margin-top: 14px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
-  .compose-head{ display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
-  .tc{ font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent-ink); background: rgba(92,47,224,0.22); padding: 2px 8px; border-radius: 6px; border: 0; font-size: 12.5px; cursor: pointer; }
-  textarea{ width: 100%; min-height: 76px; resize: vertical; font: inherit; font-size: 15px; color: var(--text); background: var(--ink); border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px 12px; }
-  textarea:focus, input:focus{ outline: none; border-color: var(--accent-ink); box-shadow: 0 0 0 3px rgba(92,47,224,0.35); }
-  .row{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-  .btn{ font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; background: var(--accent); color: #fff; }
-  .btn:hover{ background: var(--accent-hover); }
-  .btn[disabled]{ opacity: 0.6; cursor: default; }
-  .btn.ghost{ background: transparent; border-color: rgba(255,255,255,0.28); color: #fff; }
-  .btn.ghost:hover{ background: rgba(255,255,255,0.06); }
-  .btn.good{ background: #1f7a50; } .btn.good:hover{ background: #186641; }
-  .hint{ font-size: 12.5px; color: var(--muted); }
-  aside{ position: sticky; top: 76px; max-height: calc(100vh - 96px); display: flex; flex-direction: column; background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  aside h2{ margin: 0; padding: 14px 16px; font-size: 15px; font-weight: 700; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
-  aside h2 span{ color: var(--muted); font-weight: 600; font-size: 13px; }
-  .list{ overflow-y: auto; flex: 1; }
-  .c{ padding: 12px 16px; border-bottom: 1px solid var(--line); }
-  .c.active{ background: rgba(92,47,224,0.12); }
-  .c-top{ display: flex; align-items: center; gap: 8px; font-size: 13px; }
-  .c-name{ font-weight: 700; }
-  .c-name.rich::after{ content: 'Editor'; margin-left: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--accent-ink); background: rgba(92,47,224,0.22); padding: 1px 6px; border-radius: 5px; }
-  .c-done{ margin-left: auto; font-size: 12px; font-weight: 700; color: var(--good); }
-  .c-text{ margin-top: 6px; font-size: 14.5px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
-  .c.done .c-text{ color: var(--text-dim); }
-  .empty{ padding: 22px 16px; color: var(--muted); font-size: 14px; }
-  .decide{ border-top: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 8px; }
-  .decide .row{ margin: 0; }
-  .decide .btn{ flex: 1; }
-  .decided{ font-size: 13.5px; color: var(--text-dim); }
-  .center{ min-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; }
-  .card{ width: min(420px, 100%); background: var(--ink-2); border: 1px solid var(--line-strong); border-radius: 16px; padding: 26px 22px; text-align: left; }
-  .card h2{ margin: 0 0 6px; font-size: 22px; letter-spacing: -0.03em; }
-  .card p{ margin: 0 0 16px; color: var(--text-dim); font-size: 15px; line-height: 1.5; }
-  .card input{ width: 100%; min-height: 48px; padding: 0 14px; font: inherit; font-size: 16px; color: var(--text); background: var(--ink); border: 1px solid var(--line-strong); border-radius: 8px; margin-bottom: 12px; }
-  .card .btn{ width: 100%; }
-  .wait{ color: var(--text-dim); }
-  .toast{ position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; z-index: 50; }
-  .made{ display: block; width: max-content; margin: 8px auto 28px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; color: #8e8d96; text-decoration: none; border: 1px solid var(--line); }
-  .made:hover{ color: var(--text); }
-  .made strong{ font-weight: 700; color: #d8d7de; }
-  @media (max-width: 900px){
-    main{ grid-template-columns: 1fr; }
-    aside{ position: static; max-height: none; }
-    .who{ display: none; }
+  .brand{ flex: none; display: grid; place-items: center; width: 34px; height: 34px; }
+  .brand img{ width: 28px; height: 28px; }
+  .msg{ min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; text-align: center; }
+  .msg .card{ max-width: 420px; display: grid; gap: 14px; justify-items: center; color: var(--text-dim); line-height: 1.55; }
+  .msg .card img{ width: 44px; height: 44px; }
+  .msg .card strong{ color: var(--text); font-size: 18px; letter-spacing: -0.02em; }
+  .made{ display: block; text-align: center; padding: 10px; font-size: 11.5px; color: var(--muted); text-decoration: none; border-top: 1px solid var(--line); }
+  .made b{ color: var(--text-dim); }
+  .made:hover b{ color: var(--text); }
+  .decide{ display: flex; gap: 8px; }
+  @media (max-width: 600px){
+    .decide{ order: 10; width: 100%; }
+    .decide .btn{ flex: 1; }
   }
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="bar">
-    <a class="brand" href="/" aria-label="CreativeFlow Uploader"><img src="/favicon.png" alt="" width="30" height="30"></a>
-    <div class="crumb"><h1 id="title">Loading…</h1><span class="status" id="status" hidden></span></div>
-    <div class="who" id="who" hidden>Commenting as <strong id="whoName"></strong> · <button type="button" id="whoChange">change</button></div>
+
+<div class="msg" id="msgView"><div class="card"><img src="/favicon.png" alt="" width="44" height="44"><strong id="msgTitle">Loading the review…</strong><span id="msgText"></span></div></div>
+
+<div class="rv" id="app" hidden>
+  <header class="rv-top">
+    <a class="brand" href="/" target="_blank" rel="noopener" aria-label="CreativeFlow Uploader"><img src="/favicon.png" alt="" width="28" height="28"></a>
+    <div class="t"><h1 id="title"></h1><div class="sub" id="sub"></div></div>
+    <select id="version" aria-label="Version"></select>
+    <span class="pill" id="status"></span>
+    <span class="grow"></span>
+    <div class="decide" id="decide">
+      <button class="btn ghost" type="button" id="changesBtn">Needs changes</button>
+      <button class="btn good" type="button" id="approveBtn"></button>
+    </div>
+  </header>
+  <div class="rv-body">
+    <div class="rv-stage">
+      <div class="rv-banner" id="banner" hidden></div>
+      <div id="player" class="cfp"></div>
+    </div>
+    <aside class="rv-side">
+      <div class="side-head"><h2>Comments</h2><span class="count" id="count">0</span><span class="grow"></span><label><input type="checkbox" id="hideDone">Hide done</label></div>
+      <div class="cm-list" id="list"></div>
+      <div class="composer">
+        <div class="box">
+          <textarea id="noteText" rows="2" maxlength="2000" placeholder="Leave a comment at this moment…" aria-label="Your comment"></textarea>
+          <div class="foot"><button type="button" class="tc at" id="at" title="Your comment is pinned to this moment"><span id="atIco"></span><span id="atTime">0:00</span></button><span class="grow"></span><button class="btn" type="button" id="post">Send</button></div>
+        </div>
+        <div class="as" id="asLine"></div>
+      </div>
+      <a class="made" href="/" target="_blank" rel="noopener">Made with <b>CreativeFlow Uploader</b></a>
+    </aside>
   </div>
-</header>
-
-<div class="center" id="msgView"><p class="wait" id="msgText">Loading the video…</p></div>
-
-<div class="center" id="nameView" hidden>
-  <form class="card" id="nameForm">
-    <h2>Welcome to your review</h2>
-    <p>Watch the video and click anywhere in it to leave a note at that moment. What's your name?</p>
-    <input id="nameInput" maxlength="60" autocomplete="name" placeholder="Your name" aria-label="Your name" required>
-    <button class="btn" type="submit">Start reviewing</button>
-  </form>
 </div>
 
-<main id="app" hidden>
-  <section>
-    <div class="versions" id="versions" role="group" aria-label="Version"></div>
-    <div class="player"><video id="video" controls playsinline preload="metadata"></video></div>
-    <div class="marks" id="marks" aria-label="Notes on the timeline"><div class="track"></div></div>
-    <form class="compose" id="compose">
-      <div class="compose-head">Note at <button type="button" class="tc" id="atBtn" title="Jump to this moment">0:00</button><span class="hint">pauses the video while you type</span></div>
-      <textarea id="noteText" maxlength="2000" placeholder="What should change here? (e.g. cut this pause, louder music, swap this shot)" aria-label="Your note"></textarea>
-      <div class="row"><button class="btn" type="submit" id="postBtn">Post note</button><span class="hint" id="postMsg" role="status" aria-live="polite"></span></div>
-    </form>
-  </section>
-  <aside>
-    <h2>Notes <span id="count"></span></h2>
-    <div class="list" id="list"></div>
-    <div class="decide" id="decide">
-      <div class="decided" id="decided"></div>
-      <div class="row">
-        <button class="btn good" type="button" id="approveBtn">Approve this version</button>
-        <button class="btn ghost" type="button" id="changesBtn">Needs changes</button>
-      </div>
-    </div>
-  </aside>
-</main>
-<a class="made" href="/" target="_blank" rel="noopener">Made with <strong>CreativeFlow Uploader</strong></a>
+<dialog id="nameDlg">
+  <form id="nameForm">
+    <h2>What's your name?</h2>
+    <p id="nameWhy">So <span class="ed">your editor</span> knows who left each comment.</p>
+    <input id="nameInput" maxlength="60" autocomplete="name" placeholder="Your name" aria-label="Your name" required>
+    <div class="row"><button class="btn ghost" type="button" id="nameCancel">Cancel</button><button class="btn" type="submit">Continue</button></div>
+  </form>
+</dialog>
 
+<dialog id="decideDlg">
+  <form id="decideForm">
+    <h2 id="decideTitle"></h2>
+    <p id="decideText"></p>
+    <textarea id="decideNote" rows="3" maxlength="1000" placeholder="Add a note (optional)" aria-label="Note"></textarea>
+    <div class="row"><button class="btn ghost" type="button" id="decideCancel">Cancel</button><button class="btn" type="submit" id="decideGo"></button></div>
+  </form>
+</dialog>
+
+<script src="/assets/player.js"></script>
 <script>
 (function () {
+  'use strict';
   var API = 'https://creativeflow-ai.netlify.app/api/review/';
   var token = (location.hash || '').replace('#', '') || new URLSearchParams(location.search).get('t') || '';
   var $ = function (id) { return document.getElementById(id); };
-  var state = { project: null, comments: [], version: 0, name: '' };
-  try { state.name = localStorage.getItem('cf.reviewName') || ''; } catch (e) {}
-  var video = $('video');
-  var fmt = function (t) { t = Math.max(0, Math.floor(t || 0)); var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0'); };
-  function toast(t) { var el = document.createElement('div'); el.className = 'toast'; el.textContent = t; document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2600); }
-  function show(view) { ['msgView', 'nameView', 'app'].forEach(function (v) { $(v).hidden = v !== view; }); }
-  function message(text) { $('msgText').textContent = text; show('msgView'); }
+  var I = CF.icons, el = CF.el, toast = CF.toast, fmt = CF.fmt;
+  var st = { project: null, comments: [], version: 0, name: '', activeId: null };
+  try { st.name = localStorage.getItem('cf.reviewName') || ''; } catch (e) {}
+  var player = null;
+  $('atIco').innerHTML = I.clock;
+  $('approveBtn').innerHTML = I.check + '<span>Approve</span>';
 
+  function editor() { return (st.project && st.project.editor) || 'your editor'; }
+  function message(title, text) { $('msgTitle').textContent = title; $('msgText').textContent = text || ''; $('msgView').hidden = false; $('app').hidden = true; }
   function api(body) {
     return fetch(API + token, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : { cache: 'no-store' })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); });
   }
 
+  // Asks for the viewer's name the first time they comment or decide, then carries on.
+  var afterName = null;
+  function needName(then) {
+    if (st.name) { then(); return; }
+    afterName = then;
+    document.querySelectorAll('#nameWhy .ed').forEach(function (s) { s.textContent = editor(); });
+    $('nameInput').value = ''; $('nameDlg').showModal(); setTimeout(function () { $('nameInput').focus(); }, 30);
+  }
+  $('nameForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var n = $('nameInput').value.trim(); if (!n) return;
+    st.name = n; try { localStorage.setItem('cf.reviewName', n); } catch (err) {}
+    $('nameDlg').close(); renderAs();
+    var f = afterName; afterName = null; if (f) f();
+  });
+  $('nameCancel').addEventListener('click', function () { afterName = null; $('nameDlg').close(); });
+  function renderAs() {
+    var box = $('asLine'); box.textContent = '';
+    if (!st.name) { box.textContent = 'Pause anywhere and type. Your comment is pinned to that moment.'; return; }
+    var b = el('button', '', 'change'); b.type = 'button';
+    b.addEventListener('click', function () { st.name = ''; needName(function () {}); });
+    box.append('Commenting as ' + st.name + ' · ', b);
+  }
+
   function load(first) {
     return api().then(function (r) {
-      if (!r.ok) { if (first) message(r.status === 404 ? "This review link isn't valid anymore. Ask for a new one." : "Couldn't load the review. Check your connection and reload."); return; }
+      if (!r.ok) { if (first) message(r.status === 404 ? 'This link isn\'t valid any more' : 'Couldn\'t load the review', r.status === 404 ? 'Ask your editor to send you a new one.' : 'Check your connection and reload the page.'); return; }
       var p = r.d.project;
-      var newVersion = !state.project || p.versions.length !== state.project.versions.length;
-      state.project = p; state.comments = r.d.comments;
+      var newVersion = !st.project || p.versions.length !== st.project.versions.length;
+      st.project = p; st.comments = r.d.comments;
       document.title = p.title + ' | Review';
+      if (!p.versions.length) { message(p.title, 'The first cut isn\'t up yet. You\'ll be able to watch and comment here as soon as ' + editor() + ' uploads it.'); return; }
+      if (first || $('app').hidden) { $('msgView').hidden = true; $('app').hidden = false; if (!player) setupPlayer(); }
       $('title').textContent = p.title;
-      var st = $('status'); st.hidden = false;
-      st.className = 'status ' + p.status;
-      st.textContent = { waiting: 'Waiting for video', in_review: 'In review', changes: 'Changes requested', approved: 'Approved' }[p.status] || p.status;
-      if (!p.versions.length) { message('The first cut isn\'t up yet. You\'ll be able to watch and comment here as soon as it is.'); return; }
-      if (!state.name) { show('nameView'); $('nameInput').focus(); return; }
-      show('app');
-      $('who').hidden = false; $('whoName').textContent = state.name;
-      if (newVersion || !state.version) pickVersion(p.versions[p.versions.length - 1].n, first);
-      else render();
-    }).catch(function () { if (first) message("Couldn't reach the server. Check your connection and reload."); });
+      $('sub').textContent = 'From ' + editor() + (p.client ? ' for ' + p.client : '');
+      var s = $('status'); s.className = 'pill ' + p.status; s.textContent = CF.STATUS[p.status] || p.status;
+      var sel = $('version'); var keep = st.version; sel.innerHTML = '';
+      p.versions.slice().reverse().forEach(function (v) { var o = el('option', '', 'V' + v.n + (v.n === p.versions.length ? ' (latest)' : '')); o.value = v.n; sel.appendChild(o); });
+      sel.hidden = p.versions.length < 2;
+      if (newVersion || !keep) pick(p.versions[p.versions.length - 1].n, true);
+      else pick(keep, false);
+      renderAs();
+    }).catch(function () { if (first) message('Couldn\'t reach the server', 'Check your connection and reload the page.'); });
   }
 
-  function pickVersion(n, keepTime) {
-    var v = state.project.versions.find(function (x) { return x.n === n; });
+  function setupPlayer() {
+    player = CF.player($('player'));
+    player.video.addEventListener('timeupdate', function () { $('atTime').textContent = fmt(player.time()); if (!player.video.paused) { st.activeId = null; highlight(); } });
+  }
+  function pick(n, reload) {
+    var v = st.project.versions.filter(function (x) { return x.n === n; })[0];
     if (!v) return;
-    var changed = state.version !== n;
-    state.version = n;
-    if (changed) { video.src = v.url; video.load(); }
-    var box = $('versions'); box.innerHTML = '';
-    state.project.versions.forEach(function (x) {
-      var b = document.createElement('button'); b.type = 'button'; b.textContent = 'V' + x.n + (x.n === state.project.versions.length ? ' (latest)' : '');
-      b.setAttribute('aria-pressed', String(x.n === n));
-      b.addEventListener('click', function () { pickVersion(x.n); });
-      box.appendChild(b);
-    });
+    if (reload || st.version !== n) player.load(v.url);
+    st.version = n; $('version').value = String(n);
+    var latest = st.project.versions.length;
+    var d = (st.project.decisions || []).filter(function (x) { return x.version === n; }).slice(-1)[0];
+    var bn = $('banner');
+    if (d) { bn.hidden = false; bn.className = 'rv-banner ' + d.decision; bn.textContent = (d.decision === 'approved' ? '✓ Approved by ' : 'Changes requested by ') + d.name + ' · ' + CF.ago(d.at) + (d.note ? ' · "' + d.note + '"' : ''); }
+    else if (n !== latest) { bn.hidden = false; bn.className = 'rv-banner'; bn.textContent = 'You\'re watching an older version. The latest is V' + latest + '.'; }
+    else bn.hidden = true;
+    $('decide').hidden = n !== latest;
     render();
   }
+  $('version').addEventListener('change', function () { pick(Number($('version').value)); });
 
   function render() {
-    var mine = state.comments.filter(function (c) { return c.version === state.version; });
-    var open = mine.filter(function (c) { return !c.done; }).length;
-    $('count').textContent = mine.length ? mine.length + ' · ' + open + ' open' : '';
-    var list = $('list'); list.innerHTML = '';
-    if (!mine.length) list.innerHTML = '<div class="empty">No notes on this version yet. Pause anywhere and write one below the video.</div>';
-    mine.forEach(function (c) {
-      var el = document.createElement('div'); el.className = 'c' + (c.done ? ' done' : ''); el.dataset.t = c.t;
-      var top = document.createElement('div'); top.className = 'c-top';
-      var tc = document.createElement('button'); tc.type = 'button'; tc.className = 'tc'; tc.textContent = fmt(c.t);
-      tc.addEventListener('click', function () { seek(c.t); });
-      var nm = document.createElement('span'); nm.className = 'c-name' + (c.by !== 'client' ? ' rich' : ''); nm.textContent = c.name;
-      top.append(tc, nm);
-      if (c.done) { var d = document.createElement('span'); d.className = 'c-done'; d.textContent = '✓ Done'; top.appendChild(d); }
-      var tx = document.createElement('div'); tx.className = 'c-text'; tx.textContent = c.text;
-      el.append(top, tx); list.appendChild(el);
+    var all = st.comments.filter(function (c) { return c.version === st.version; });
+    var list = all.filter(function (c) { return !($('hideDone').checked && c.done); });
+    $('count').textContent = all.length;
+    var box = $('list'); box.innerHTML = '';
+    if (!all.length) box.appendChild(el('div', 'empty', 'No comments yet. Pause the video anywhere and leave one below. It\'s pinned to that exact moment.'));
+    else if (!list.length) box.appendChild(el('div', 'empty', 'Everything here is done.'));
+    list.forEach(function (c) {
+      var ed = c.by !== 'client';
+      var row = el('div', 'cm' + (c.done ? ' done' : '')); row.dataset.t = c.t; row.dataset.id = c.id;
+      row.appendChild(CF.avatar(c.name));
+      var main = el('div', 'main'), head = el('div', 'head');
+      head.appendChild(el('span', 'who', c.name));
+      if (ed) head.appendChild(el('span', 'tag', 'EDITOR'));
+      head.appendChild(el('span', 'when', CF.ago(c.created)));
+      head.appendChild(el('span', 'grow'));
+      if (c.done) { var ck = el('span', 'check on static'); ck.innerHTML = I.check; ck.title = 'Done'; head.appendChild(ck); }
+      var text = el('div', 'text'); var tc = el('button', 'tc', fmt(c.t)); tc.type = 'button';
+      text.append(tc, el('span', 'body', c.text));
+      main.append(head, text); row.appendChild(main);
+      row.addEventListener('click', function () { st.activeId = c.id; player.seek(c.t); highlight(); });
+      box.appendChild(row);
     });
-    drawMarks();
-    var latest = state.project.versions.length;
-    var last = (state.project.decisions || []).filter(function (d) { return d.version === state.version; }).slice(-1)[0];
-    $('decided').textContent = last ? (last.decision === 'approved' ? '✓ Approved by ' : 'Changes requested by ') + last.name + ' on ' + new Date(last.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + (last.note ? ': "' + last.note + '"' : '')
-      : state.version === latest ? 'Happy with this version? Let ' + (state.project.editor || 'your editor') + ' know.' : 'This is an older version. The latest is V' + latest + '.';
-  }
-
-  function drawMarks() {
-    var box = $('marks'); box.querySelectorAll('button').forEach(function (b) { b.remove(); });
-    var dur = video.duration;
-    if (!isFinite(dur) || dur <= 0) return;
-    state.comments.filter(function (c) { return c.version === state.version; }).forEach(function (c) {
-      var b = document.createElement('button'); b.type = 'button'; b.className = c.done ? 'done' : '';
-      b.style.left = Math.min(100, (c.t / dur) * 100) + '%';
-      b.title = fmt(c.t) + ' · ' + c.name + ': ' + c.text.slice(0, 80);
-      b.setAttribute('aria-label', 'Note at ' + fmt(c.t) + ' from ' + c.name);
-      b.addEventListener('click', function () { seek(c.t); });
-      box.appendChild(b);
+    player.setMarks(all, function (m) {
+      st.activeId = m.id; highlight();
+      var r = document.querySelector('.cm[data-id="' + m.id + '"]'); if (r) r.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     });
+    $('approveBtn').querySelector('span').textContent = 'Approve V' + st.version;
+    highlight();
   }
-
-  function seek(t) { video.currentTime = t; video.pause(); highlight(); }
   function highlight() {
-    var now = video.currentTime;
-    document.querySelectorAll('.c').forEach(function (el) { el.classList.toggle('active', Math.abs(Number(el.dataset.t) - now) < 1.5); });
+    var now = player ? player.time() : 0;
+    document.querySelectorAll('.cm').forEach(function (n) { n.classList.toggle('active', n.dataset.id === st.activeId || (!st.activeId && Math.abs(Number(n.dataset.t) - now) < 1.5)); });
   }
+  $('hideDone').addEventListener('change', render);
 
-  video.addEventListener('loadedmetadata', drawMarks);
-  video.addEventListener('timeupdate', function () { $('atBtn').textContent = fmt(video.currentTime); highlight(); });
-  $('atBtn').addEventListener('click', function () { video.pause(); });
-  $('noteText').addEventListener('focus', function () { video.pause(); });
-
-  $('compose').addEventListener('submit', function (e) {
-    e.preventDefault();
+  function post() {
     var text = $('noteText').value.trim();
     if (!text) { $('noteText').focus(); return; }
-    var btn = $('postBtn'); btn.disabled = true; $('postMsg').textContent = 'Posting…';
-    api({ action: 'comment', name: state.name, version: state.version, t: video.currentTime, text: text }).then(function (r) {
-      btn.disabled = false;
-      if (!r.ok) { $('postMsg').textContent = r.d.error && r.d.error.code === 'daily_limit' ? 'That\'s a lot of notes for one day. Try again tomorrow.' : 'Couldn\'t post that. Try again.'; return; }
-      $('noteText').value = ''; $('postMsg').textContent = '';
-      state.comments.push(r.d.comment); state.comments.sort(function (a, b) { return (a.version - b.version) || (a.t - b.t); });
-      render(); toast('Note added at ' + fmt(r.d.comment.t));
-    }).catch(function () { btn.disabled = false; $('postMsg').textContent = 'Couldn\'t reach the server. Try again.'; });
-  });
+    var t = player.time();
+    needName(function () {
+      var btn = $('post'); btn.disabled = true;
+      api({ action: 'comment', name: st.name, version: st.version, t: t, text: text }).then(function (r) {
+        btn.disabled = false;
+        if (!r.ok) { toast(r.d.error && r.d.error.code === 'daily_limit' ? 'That\'s a lot of comments for one day. Try again tomorrow.' : 'Couldn\'t post that. Try again.'); return; }
+        $('noteText').value = '';
+        st.comments.push(r.d.comment); st.comments.sort(function (a, b) { return (a.version - b.version) || (a.t - b.t); });
+        if (st.project.status === 'approved') st.project.status = 'in_review';
+        st.activeId = r.d.comment.id; render(); toast('Comment added at ' + fmt(r.d.comment.t));
+      }).catch(function () { btn.disabled = false; toast('Couldn\'t reach the server. Try again.'); });
+    });
+  }
+  $('post').addEventListener('click', post);
+  $('noteText').addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); post(); } });
+  $('noteText').addEventListener('focus', function () { if (player) player.video.pause(); });
+  $('at').addEventListener('click', function () { player.video.pause(); $('noteText').focus(); });
 
+  // approve / needs changes
+  var deciding = null;
   function decide(decision) {
-    var note = '';
-    if (decision === 'changes') { note = prompt('Anything to add? (optional; your notes on the video are already sent)', '') ; if (note === null) return; }
-    else if (!confirm('Approve V' + state.version + '? This tells ' + (state.project.editor || 'your editor') + ' the video is ready.')) return;
-    api({ action: 'decide', name: state.name, version: state.version, decision: decision, note: note }).then(function (r) {
+    needName(function () {
+      deciding = decision;
+      var ok = decision === 'approved';
+      $('decideTitle').textContent = ok ? 'Approve V' + st.version + '?' : 'Ask for changes on V' + st.version + '?';
+      $('decideText').textContent = ok ? 'This tells ' + editor() + ' the video is ready to go.' : 'Your comments on the video are already sent. Add anything else ' + editor() + ' should know.';
+      $('decideGo').textContent = ok ? 'Approve' : 'Send';
+      $('decideGo').className = 'btn' + (ok ? ' good' : '');
+      $('decideNote').value = ''; $('decideDlg').showModal();
+    });
+  }
+  $('decideCancel').addEventListener('click', function () { $('decideDlg').close(); });
+  $('decideForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var decision = deciding; $('decideDlg').close();
+    api({ action: 'decide', name: st.name, version: st.version, decision: decision, note: $('decideNote').value.trim() }).then(function (r) {
       if (!r.ok) { toast('Couldn\'t send that. Try again.'); return; }
       toast(decision === 'approved' ? 'Approved. Thank you!' : 'Sent. Changes are on the way.');
       load(false);
     }).catch(function () { toast('Couldn\'t reach the server. Try again.'); });
-  }
+  });
   $('approveBtn').addEventListener('click', function () { decide('approved'); });
   $('changesBtn').addEventListener('click', function () { decide('changes'); });
 
-  $('nameForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var n = $('nameInput').value.trim();
-    if (!n) return;
-    state.name = n; try { localStorage.setItem('cf.reviewName', n); } catch (err) {}
-    load(true);
-  });
-  $('whoChange').addEventListener('click', function () { $('nameInput').value = state.name; show('nameView'); $('nameInput').focus(); });
-
-  if (!/^[0-9a-f]{32}$/.test(token)) { message("This review link isn't complete. Open the full link you were sent."); return; }
+  if (!/^[0-9a-f]{32}$/.test(token)) { message('This link isn\'t complete', 'Open the full link you were sent.'); return; }
   load(true);
-  // New notes and versions from the editor appear without reloading.
-  setInterval(function () { if (!document.hidden && state.project) load(false); }, 20000);
+  // New comments and versions from the editor appear without reloading.
+  setInterval(function () { if (!document.hidden && st.project) load(false); }, 20000);
 })();
 </script>
 </body>
