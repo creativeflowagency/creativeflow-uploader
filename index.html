@@ -146,6 +146,62 @@
     .how-card{ padding: 24px 22px; }
   }
 
+  /* ================= Pricing tiers (landing + settings) ================= */
+  .tiers{ margin: 36px auto 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; text-align: left; max-width: 1080px; }
+  .tier{ position: relative; display: flex; flex-direction: column; background: var(--ink-2); border: 1px solid var(--line-strong); border-radius: 16px; padding: 28px 24px 24px; }
+  .tier.hot{ border-color: rgba(201,192,255,0.55); box-shadow: 0 0 0 1px rgba(92,47,224,0.35), 0 30px 70px -40px rgba(92,47,224,0.8); }
+  .tier .badge{ position: absolute; top: -11px; left: 24px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--accent); color: #fff; padding: 4px 10px; border-radius: 999px; }
+  .tier .kick{ margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-ink); }
+  .tier .price{ margin: 12px 0 0; font-size: 52px; font-weight: 700; letter-spacing: -0.05em; line-height: 1; }
+  .tier .price small{ font-size: 15px; color: var(--text-dim); letter-spacing: 0; font-weight: 500; }
+  .tier ul{ list-style: none; margin: 20px 0 22px; padding: 0; border-top: 1px solid var(--line-strong); flex: 1; }
+  .tier li{ display: flex; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.45; }
+  .tier li svg{ flex: none; width: 16px; height: 16px; margin-top: 3px; color: var(--accent-ink); }
+  .tier li b{ font-weight: 700; }
+  .tier .btn{ width: 100%; }
+  .addon-line{ margin: 22px auto 0; color: var(--text-dim); font-size: 15px; }
+  .addon-line b{ color: var(--text); }
+  @media (max-width: 900px){ .tiers{ grid-template-columns: 1fr; max-width: 460px; } }
+  /* settings page */
+  .set{ display: grid; gap: 18px; max-width: 1080px; }
+  .set-card{ background: var(--ink-2); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .set-card > h2{ margin: 0; font-size: 17px; letter-spacing: -0.02em; }
+  .set-card > p.lead2{ margin: 6px 0 0; color: var(--text-dim); font-size: 14px; line-height: 1.5; }
+  .set-card .tiers{ margin-top: 22px; max-width: none; }
+  .set-card .tier{ background: var(--ink); padding: 24px 20px 20px; }
+  .set-card .tier .price{ font-size: 40px; }
+  .plan-sum{ margin-top: 14px; display: grid; grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .plan-sum > div{ background: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+  .plan-sum .lbl{ font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .plan-sum .big{ font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
+  .plan-sum .sub2{ font-size: 13px; color: var(--text-dim); line-height: 1.45; }
+  .plan-sum .acts2{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .plan-sum .bar{ height: 6px; border-radius: 6px; background: var(--ink-4); overflow: hidden; }
+  .plan-sum .bar span{ display: block; height: 100%; background: var(--accent); }
+  .addon-box{ margin-top: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: 12px; font-size: 14px; color: var(--text-dim); }
+  .addon-box b{ color: var(--text); }
+  .stepper{ display: inline-flex; align-items: center; border: 1px solid var(--line-strong); border-radius: 9px; overflow: hidden; }
+  .stepper button{ width: 36px; height: 36px; border: 0; background: var(--ink-3); color: var(--text); font-size: 18px; cursor: pointer; }
+  .stepper button:hover{ background: var(--ink-4); }
+  .stepper span{ min-width: 44px; text-align: center; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+  .people{ margin-top: 14px; display: grid; gap: 2px; }
+  .person{ display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+  .person .nm{ flex: 1; min-width: 0; font-weight: 600; font-size: 14px; }
+  .person .nm small{ display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+  .row-form{ margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .row-form input{ flex: 1 1 220px; }
+  .kv{ margin-top: 14px; display: grid; gap: 10px; font-size: 14px; color: var(--text-dim); }
+  .kv strong{ color: var(--text); }
+  .sb-plan{ display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 9px 10px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--ink-3); color: var(--text); font: 600 13px var(--font); cursor: pointer; text-align: left; }
+  .sb-plan:hover{ background: var(--ink-4); }
+  .sb-plan span{ color: var(--accent-ink); font-size: 12px; }
+  .sb-plan.none{ background: var(--accent); border-color: transparent; color: #fff; }
+  .sb-plan.none span{ color: #fff; }
+  .blocked{ grid-column: 1 / -1; border: 1px solid var(--line-strong); border-radius: 14px; padding: 32px 24px; text-align: center; color: var(--text-dim); line-height: 1.55; }
+  .blocked h2{ margin: 0 0 8px; color: var(--text); font-size: 19px; }
+  .blocked .btn{ margin-top: 14px; }
+  @media (max-width: 760px){ .plan-sum{ grid-template-columns: 1fr; } }
+
   /* ================= App shell (editor) ================= */
   .shell{ display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; }
   .sidebar{ position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--ink-2); border-right: 1px solid var(--line); padding: 14px 12px; padding-top: max(14px, env(safe-area-inset-top)); }
@@ -250,7 +306,7 @@
       <a class="hide-sm" href="#features">Features</a>
       <a class="hide-sm" href="#pricing">Pricing</a>
       <button class="link" type="button" data-signin>Sign in</button>
-      <button class="nav-cta" type="button" data-signup>Start free</button>
+      <button class="nav-cta" type="button" data-signup>Get started</button>
     </div>
   </nav></div></header>
 
@@ -259,7 +315,7 @@
       <h1 class="hero-headline">Client feedback, <em>pinned to the exact frame.</em></h1>
       <p class="hero-sub">Upload your edit, send one private link, and your client drops notes right on the moment they mean. No more "around the 2 minute mark".</p>
       <div class="hero-ctas">
-        <button class="btn" type="button" data-signup>Start free</button>
+        <button class="btn" type="button" data-signup>Get started</button>
         <button class="btn btn-outline" type="button" data-signin>Sign in</button>
       </div>
       <ul class="hero-ticks">
@@ -311,28 +367,16 @@
   </div></section>
 
   <section class="offer-sec" id="pricing"><div class="wrap">
-    <h2>Start for free</h2>
-    <p class="lead">No card needed. Sign up in under a minute.</p>
-    <div class="offer">
-      <p class="kick">The free plan</p>
-      <h3>Everything you need to run client reviews</h3>
-      <div class="price">$0 <small>to start</small></div>
-      <ul>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>5 GB of video storage</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Unlimited reviewers on every link</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Timestamped comments and replies</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Versions, approvals and done-ticks</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Works on phone and desktop, installs like an app</li>
-      </ul>
-      <p class="after">Your next review round, sorted in under a minute.</p>
-      <button class="btn block big" type="button" data-signup>Start free</button>
-    </div>
+    <h2>Simple pricing</h2>
+    <p class="lead">Pick a plan, change or cancel any time.</p>
+    <div class="tiers" id="tiersLanding"></div>
+    <p class="addon-line">Need more room? Add storage in 50 GB blocks for <b>$5/month</b> each, on any plan.</p>
   </div></section>
 
   <section class="cta-sec"><div class="wrap"><div class="cta-card">
     <h2>Stop chasing feedback. Start shipping edits.</h2>
     <p>Send your next cut with FlowReview and get notes you can actually act on.</p>
-    <button class="btn big" type="button" data-signup>Start free</button>
+    <button class="btn big" type="button" data-signup>Get started</button>
   </div></div></section>
 
   <footer class="site-footer"><div class="wrap">
@@ -357,10 +401,53 @@
     <div class="sb-label">Reviews</div>
     <div class="sb-recent" id="sbRecent"></div>
     <div class="sb-foot">
+      <button class="sb-plan" type="button" id="sbPlan"></button>
       <div class="meter" id="meter"><span id="meterText">–</span><div class="bar"><span id="meterBar"></span></div></div>
       <button class="me" type="button" id="me"><span id="meAvatar"></span><span class="who"><b id="meName"></b><span id="meEmail"></span></span></button>
     </div>
   </aside>
+
+  <div class="main" id="setView" hidden>
+    <header class="m-top">
+      <button class="icon-btn m-burger" type="button" id="burger2" aria-label="Menu"></button>
+      <h1>Settings &amp; billing</h1>
+    </header>
+    <div class="m-body"><div class="set">
+      <div class="notice" id="billNotice" hidden></div>
+      <section class="set-card">
+        <h2>Plan &amp; billing</h2>
+        <div class="plan-sum" id="planSum"></div>
+        <div class="tiers" id="tiersApp"></div>
+        <div class="addon-box" id="addonBox" hidden></div>
+      </section>
+      <section class="set-card">
+        <h2>Team</h2>
+        <p class="lead2" id="teamLead"></p>
+        <div class="people" id="people"></div>
+        <div id="teamActs"></div>
+      </section>
+      <section class="set-card" id="compCard">
+        <h2>CreativeFlow monthly client?</h2>
+        <p class="lead2">CreativeFlow's monthly clients get FlowReview Pro free. Enter the code you were sent.</p>
+        <form class="row-form" id="redeemForm"><input id="redeemCode" maxlength="40" placeholder="Your code" aria-label="Code" autocomplete="off"><button class="btn" type="submit">Redeem</button></form>
+      </section>
+      <section class="set-card">
+        <h2>Profile</h2>
+        <div class="kv">
+          <div>Signed in as <strong id="acctEmail"></strong></div>
+          <div>Clients see your comments as <strong id="acctName"></strong></div>
+          <div>Storage: <strong id="acctStorage"></strong></div>
+        </div>
+        <div class="row-form"><button class="btn ghost" type="button" id="acctRename">Change name</button><button class="btn ghost" type="button" id="acctOut">Sign out</button></div>
+      </section>
+      <section class="set-card" id="founderCard" hidden>
+        <h2>Comp codes (only you see this)</h2>
+        <p class="lead2">Make a one-time code for a CreativeFlow monthly client. When they redeem it, their account gets Pro free until you revoke it.</p>
+        <form class="row-form" id="compForm"><input id="compNote" maxlength="120" placeholder="Who it's for, e.g. Sparkxs (monthly)" aria-label="Who it's for"><button class="btn" type="submit">Make code</button></form>
+        <div class="people" id="compList"></div>
+      </section>
+    </div></div>
+  </div>
 
   <div class="main" id="libView">
     <header class="m-top">
@@ -451,20 +538,6 @@
   </form>
 </dialog>
 
-<dialog id="acctDlg">
-  <h2>Your account</h2>
-  <div class="acct-info">
-    <div>Signed in as <strong id="acctEmail"></strong></div>
-    <div>Clients see you as <strong id="acctName"></strong></div>
-    <div>Storage: <strong id="acctStorage"></strong></div>
-  </div>
-  <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px">
-    <button class="btn ghost" type="button" id="acctRename">Change name</button>
-    <button class="btn ghost" type="button" id="acctOut">Sign out</button>
-    <button class="btn" type="button" data-close>Done</button>
-  </div>
-</dialog>
-
 <script src="/assets/player.js"></script>
 <script>
 (function () {
@@ -485,7 +558,19 @@
     too_many_projects: 'You\'ve hit the review limit. Delete some old reviews first.',
     daily_limit: 'That\'s a lot of activity for one day. Try again tomorrow.',
     signed_out: 'You were signed out. Reload the page.',
-    network: 'Couldn\'t reach the server. Check your connection.'
+    network: 'Couldn\'t reach the server. Check your connection.',
+    no_plan: 'Choose a plan to upload videos.',
+    seat_limit: 'Your plan\'s seats are full. Upgrade or remove a teammate.',
+    over_storage: 'You\'re using more storage than that would allow. Delete some videos first.',
+    over_seats: 'That plan has fewer seats than your team. Remove teammates first.',
+    billing_not_configured: 'Billing is still being set up. Try again soon.',
+    billing_error: 'The payment provider couldn\'t do that. Try again in a minute.',
+    owner_only: 'Only the account owner can change that.',
+    no_subscription: 'There\'s no paid plan on this account yet.',
+    bad_code: 'That code isn\'t valid or was already used.',
+    bad_invite: 'That invite link has expired or was already used. Ask for a new one.',
+    in_other_team: 'You\'re already in another team. Leave it first in Settings.',
+    own_invite: 'That\'s your own invite link. Send it to a teammate.'
   };
   var $ = function (id) { return document.getElementById(id); };
   var clerk = null, started = false, uploading = false, player = null;
@@ -495,7 +580,7 @@
   document.querySelectorAll('[data-new]').forEach(function (b) { b.innerHTML = I.plus + '<span>New review</span>'; });
   $('burger').innerHTML = I.menu; $('searchIco').innerHTML = I.search; $('back').innerHTML = I.arrowLeft;
   $('upBtn').querySelector('.ic').innerHTML = I.upload; $('shareBtn').innerHTML = I.share + '<span>Share</span>';
-  $('moreBtn').innerHTML = I.more; $('noVideoIco').innerHTML = I.upload; $('atIco').innerHTML = I.clock;
+  $('moreBtn').innerHTML = I.more; $('burger2').innerHTML = I.menu; $('noVideoIco').innerHTML = I.upload; $('atIco').innerHTML = I.clock;
   $('mView').innerHTML = I.eye + 'Open client view'; $('mRename').innerHTML = I.edit + 'Rename'; $('mDelete').innerHTML = I.trash + 'Delete review';
   document.querySelectorAll('dialog [data-close]').forEach(function (b) { b.addEventListener('click', function () { b.closest('dialog').close(); }); });
 
@@ -533,6 +618,10 @@
     var av = $('meAvatar'); av.innerHTML = '';
     if (u && u.hasImage && u.imageUrl) { var s = el('span', 'avatar'); var img = el('img'); img.src = u.imageUrl; img.alt = ''; s.appendChild(img); av.appendChild(s); }
     else av.appendChild(CF.avatar(myName(), 30));
+    var sp = $('sbPlan');
+    sp.className = 'sb-plan' + (a.plan ? '' : ' none');
+    sp.innerHTML = '';
+    sp.append(a.plan ? (a.planName + ' plan') : 'Choose a plan', el('span', '', a.plan ? 'Settings' : 'See plans'));
     $('acctEmail').textContent = email || myName();
     $('acctName').textContent = a.name || '(not set)';
     $('acctStorage').textContent = size(a.used) + (a.quota ? ' of ' + size(a.quota) + ' used' : ' used, no limit');
@@ -550,8 +639,9 @@
     try { var r = await api('POST', { action: 'account', name: name }); st.account = r.account; renderAccount(); renderAs(); $('nameDlg').close(); toast('Saved. Clients see you as ' + st.account.name + '.'); }
     catch (err) { toast(ERRORS[err.code] || 'Couldn\'t save that.'); }
   });
-  $('me').addEventListener('click', function () { renderAccount(); $('acctDlg').showModal(); });
-  $('acctRename').addEventListener('click', function () { $('acctDlg').close(); askName(false); });
+  $('me').addEventListener('click', function () { closeMenu(); location.hash = 'settings'; });
+  $('sbPlan').addEventListener('click', function () { closeMenu(); location.hash = 'settings'; });
+  $('acctRename').addEventListener('click', function () { askName(false); });
   $('acctOut').addEventListener('click', async function () {
     try { localStorage.removeItem(HINT); } catch (e) {}
     try { await clerk.signOut({ redirectUrl: location.origin + '/' }); } catch (e) { location.href = '/'; }
@@ -566,8 +656,12 @@
     return true;
   }
   async function load() {
-    try { var r = await api('GET'); st.list = r.projects; st.account = r.account; st.ready = r.ready; }
-    catch (e) { if (!st.list) { $('assets').innerHTML = ''; $('assets').appendChild(el('div', 'empty', ERRORS[e.code] || 'Couldn\'t load your reviews.')); } return false; }
+    try { var r = await api('GET'); st.list = r.projects; st.account = r.account; st.ready = r.ready; st.role = r.role; }
+    catch (e) {
+      if (e.code === 'seat_limit') { seatBlocked(); return false; }
+      if (!st.list) { $('assets').innerHTML = ''; $('assets').appendChild(el('div', 'empty', ERRORS[e.code] || 'Couldn\'t load your reviews.')); }
+      return false;
+    }
     $('setupNotice').hidden = st.ready;
     renderAccount(); renderNav(); renderLibrary();
     return true;
@@ -641,7 +735,7 @@
   $('burger').addEventListener('click', function () { $('app').classList.toggle('menu-open'); });
   $('app').addEventListener('click', function (e) { if (e.target === $('app') && $('app').classList.contains('menu-open')) closeMenu(); });
   function closeMenu() { $('app').classList.remove('menu-open'); }
-  document.addEventListener('click', function (e) { if ($('app').classList.contains('menu-open') && !$('sidebar').contains(e.target) && !$('burger').contains(e.target)) closeMenu(); });
+  document.addEventListener('click', function (e) { if ($('app').classList.contains('menu-open') && !$('sidebar').contains(e.target) && !$('burger').contains(e.target) && !$('burger2').contains(e.target)) closeMenu(); });
 
   async function copyLink(p) {
     try { await navigator.clipboard.writeText(link(p)); toast('Client link copied. Send it to ' + (p.client || 'your client') + '.'); }
@@ -674,8 +768,11 @@
   // ------------------------------------------------ routing: #p/<id> opens a review (back button works)
   function go(id) { location.hash = id ? 'p/' + id : ''; }
   function route() {
-    var m = location.hash.match(/^#p\/(r[0-9a-z]{6,20})$/);
-    if (m) open(m[1]); else close();
+    var m = location.hash.match(/^#p\/(r[0-9a-z]{6,20})$/), j = location.hash.match(/^#join\/([0-9a-f]{24})$/);
+    if (m) open(m[1]);
+    else if (j) join(j[1]);
+    else if (location.hash === '#settings') showSettings();
+    else close();
   }
   window.addEventListener('hashchange', function () { if (started) route(); });
 
@@ -704,7 +801,7 @@
   function close() {
     st.open = null; st.project = null;
     if (player) player.unload();
-    $('rvView').hidden = true; $('app').hidden = false; document.title = 'FlowReview';
+    $('rvView').hidden = true; $('app').hidden = false; $('setView').hidden = true; $('libView').hidden = false; document.title = 'FlowReview';
     load();
   }
   $('back').addEventListener('click', function () { go(''); });
@@ -850,6 +947,7 @@
       load();
     } catch (e) {
       prog.hidden = true;
+      if (e.code === 'no_plan') { toast(ERRORS.no_plan); uploading = false; location.hash = 'settings'; return; }
       toast(ERRORS[e.code] || (e.code === 'upload_network' ? 'The upload stopped. Check your connection and try again.' : 'Upload failed. Try again.'));
     }
     uploading = false;
@@ -863,6 +961,230 @@
   $('rvView').addEventListener('drop', function (e) { e.preventDefault(); drag = 0; $('drop').hidden = true; upload(e.dataTransfer.files[0]); });
   window.addEventListener('beforeunload', function (e) { if (uploading) { e.preventDefault(); e.returnValue = ''; } });
 
+  // ------------------------------------------------ plans (same as the server's lib/flowreview-billing.mjs)
+  var TIERS = [
+    { id: 'starter', name: 'Starter', price: 15, lines: ['<b>50 GB</b> storage', '<b>1</b> user', 'Unlimited review links', 'Timestamped comments, versions and approvals'] },
+    { id: 'pro', name: 'Pro', price: 39, hot: true, lines: ['<b>250 GB</b> storage', '<b>5</b> users', 'Unlimited review links', 'Version compare', 'Brand watermark'] },
+    { id: 'studio', name: 'Studio', price: 99, lines: ['<b>1 TB</b> storage', '<b>Unlimited</b> users', 'Unlimited review links', 'Version compare and brand watermark', 'Priority streaming'] }
+  ];
+  var RANK = { starter: 0, pro: 1, studio: 2 };
+  var TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  // button(tier) -> { label, disabled, ghost, onClick }
+  function renderTiers(box, button) {
+    box.innerHTML = '';
+    TIERS.forEach(function (t) {
+      var c = el('div', 'tier' + (t.hot ? ' hot' : ''));
+      if (t.hot) c.appendChild(el('span', 'badge', 'Most popular'));
+      c.appendChild(el('p', 'kick', t.name));
+      var pr = el('div', 'price', '$' + t.price + ' '); pr.appendChild(el('small', '', '/month')); c.appendChild(pr);
+      var ul = el('ul'); t.lines.forEach(function (l) { var li = el('li'); li.innerHTML = TICK + '<span>' + l + '</span>'; ul.appendChild(li); }); c.appendChild(ul);
+      var b = button(t), btn = el('button', 'btn big' + (b.ghost ? ' ghost' : ''), b.label); btn.type = 'button'; btn.disabled = !!b.disabled;
+      if (b.onClick) btn.addEventListener('click', function () { b.onClick(btn); });
+      c.appendChild(btn); box.appendChild(c);
+    });
+  }
+  // Landing page: choosing a plan signs you up first, then goes straight to paying.
+  renderTiers($('tiersLanding'), function (t) {
+    return { label: 'Choose ' + t.name, ghost: !t.hot, onClick: function () {
+      try { localStorage.setItem('fr.plan', t.id); } catch (e) {}
+      if (started) { location.hash = 'settings'; return; }
+      if (!clerk) { toast('Sign-in is still loading. One moment.'); return; }
+      clerk.openSignUp({ appearance: appearance, forceRedirectUrl: location.href, fallbackRedirectUrl: location.href });
+    } };
+  });
+
+  // ------------------------------------------------ settings & billing
+  var bill = null, team = null, addonDraft = 0;
+  function showSettings() {
+    st.open = null; st.project = null; if (player) player.unload();
+    $('rvView').hidden = true; $('app').hidden = false; $('libView').hidden = true; $('setView').hidden = false;
+    document.title = 'Settings | FlowReview'; window.scrollTo(0, 0);
+    loadSettings();
+  }
+  async function loadSettings() {
+    try {
+      var r = await Promise.all([api('POST', { action: 'billing' }), api('POST', { action: 'team' }), api('GET')]);
+      bill = r[0]; team = r[1]; st.account = r[2].account; st.role = r[2].role; st.list = r[2].projects;
+    } catch (e) { if (e.code === 'seat_limit') { seatBlocked(); return; } toast(ERRORS[e.code] || 'Couldn\'t load your settings.'); return; }
+    addonDraft = bill.addons || 0;
+    renderAccount(); renderSettings();
+    if (bill.isFounder) loadComps();
+    // came from "Choose Pro" on the pricing page before signing up
+    var pending = null; try { pending = localStorage.getItem('fr.plan'); localStorage.removeItem('fr.plan'); } catch (e) {}
+    if (pending && RANK[pending] !== undefined && bill.role === 'owner' && bill.plan !== pending && bill.ready && bill.plan !== 'founder') choosePlan(pending);
+  }
+  function fmtDate(ms) { return ms ? new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
+  function renderSettings() {
+    var b = bill, a = st.account, owner = b.role === 'owner', paid = b.source === 'stripe';
+    // notices
+    var n = $('billNotice'), msg = '';
+    if (!b.ready && owner && b.plan !== 'founder') msg = 'Billing is being set up. Plans can be chosen shortly.';
+    if (paid && b.status === 'past_due') msg = 'Your last payment didn\'t go through. Update your card in Manage billing to keep your plan.';
+    n.hidden = !msg; n.textContent = msg;
+    // summary
+    var sum = $('planSum'); sum.innerHTML = '';
+    var p1 = el('div'); p1.appendChild(el('span', 'lbl', 'Plan'));
+    p1.appendChild(el('span', 'big', b.plan === 'founder' ? 'Founder' : b.plan ? b.planName : 'No plan yet'));
+    var line = b.plan === 'founder' ? 'Everything included, no limits.'
+      : b.source === 'comp' ? 'Free with your CreativeFlow monthly plan.'
+      : paid ? '$' + (TIERS.filter(function (t) { return t.id === b.plan; })[0].price + (b.addons || 0) * 5) + '/month' + (b.cancelAtPeriodEnd ? ' · cancels on ' + fmtDate(b.periodEnd) : b.periodEnd ? ' · renews ' + fmtDate(b.periodEnd) : '')
+      : 'Pick a plan below to start uploading.';
+    if (!owner) line = 'You\'re on ' + (team && team.owner.name ? team.owner.name + '\'s' : 'the account owner\'s') + ' plan. Only they can change billing.';
+    p1.appendChild(el('span', 'sub2', line));
+    if (owner && b.hasCustomer && b.ready) {
+      var acts = el('div', 'acts2'), m = el('button', 'btn ghost', 'Manage billing'); m.type = 'button';
+      m.title = 'Card, invoices and cancelling (on Stripe)';
+      m.addEventListener('click', async function () { m.disabled = true; try { var r = await api('POST', { action: 'portal' }); location.href = r.url; } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t open billing.'); m.disabled = false; } });
+      acts.appendChild(m); p1.appendChild(acts);
+    }
+    var p2 = el('div'); p2.appendChild(el('span', 'lbl', 'Storage'));
+    p2.appendChild(el('span', 'big', size(a.used)));
+    p2.appendChild(el('span', 'sub2', a.quota === null ? 'No limit' : 'of ' + size(a.quota) + (b.addons ? ' (includes ' + b.addons * 50 + ' GB extra)' : '')));
+    var bar = el('div', 'bar'), fill = el('span'); fill.style.width = a.quota ? Math.min(100, a.used / a.quota * 100).toFixed(1) + '%' : (a.quota === 0 ? '0%' : '2%'); bar.appendChild(fill); p2.appendChild(bar);
+    var p3 = el('div'); p3.appendChild(el('span', 'lbl', 'Users'));
+    p3.appendChild(el('span', 'big', String(team ? team.used : 1)));
+    p3.appendChild(el('span', 'sub2', b.seats === null ? 'Unlimited seats' : 'of ' + b.seats + ' seat' + (b.seats === 1 ? '' : 's')));
+    sum.append(p1, p2, p3);
+    // tiers
+    var tiers = $('tiersApp');
+    tiers.hidden = b.plan === 'founder' || !owner;
+    if (!tiers.hidden) renderTiers(tiers, function (t) {
+      if (paid && b.plan === t.id) return { label: 'Current plan', disabled: true, ghost: true };
+      if (b.source === 'comp' && RANK[b.comp.plan] >= RANK[t.id]) return { label: b.comp.plan === t.id ? 'Included free' : 'Included in your Pro', disabled: true, ghost: true };
+      var up = !paid || RANK[t.id] > RANK[b.plan];
+      return { label: paid ? (up ? 'Upgrade to ' : 'Switch to ') + t.name : 'Choose ' + t.name, ghost: !(t.hot || up && paid), disabled: !b.ready, onClick: function () { choosePlan(t.id); } };
+    });
+    // extra storage
+    var ab = $('addonBox');
+    ab.hidden = !owner || b.plan === 'founder';
+    ab.innerHTML = '';
+    if (!ab.hidden) {
+      if (!paid) { ab.innerHTML = 'Need more room? After choosing a plan you can add storage in <b>50 GB</b> blocks for <b>$5/month</b> each.'; }
+      else {
+        var lab = el('span'); lab.innerHTML = 'Extra storage: <b>50 GB</b> blocks at <b>$5/month</b> each';
+        var stp = el('span', 'stepper'), minus = el('button', '', '−'), plus = el('button', '', '+'), num = el('span', '', String(addonDraft));
+        minus.type = plus.type = 'button'; minus.setAttribute('aria-label', 'One less'); plus.setAttribute('aria-label', 'One more');
+        var info = el('span', '', '');
+        var save = el('button', 'btn', 'Save'); save.type = 'button';
+        function upd() { num.textContent = addonDraft; info.textContent = '= ' + addonDraft * 50 + ' GB extra, $' + addonDraft * 5 + '/month'; save.disabled = addonDraft === (b.addons || 0); }
+        minus.addEventListener('click', function () { addonDraft = Math.max(0, addonDraft - 1); upd(); });
+        plus.addEventListener('click', function () { addonDraft = Math.min(200, addonDraft + 1); upd(); });
+        save.addEventListener('click', async function () {
+          if (!confirm('Change extra storage to ' + addonDraft * 50 + ' GB ($' + addonDraft * 5 + '/month)? Stripe adjusts your next bill for the rest of this month.')) return;
+          save.disabled = true;
+          try { await api('POST', { action: 'change_plan', addons: addonDraft }); toast('Storage updated.'); loadSettings(); }
+          catch (e) { toast(ERRORS[e.code] || 'Couldn\'t change that.'); save.disabled = false; }
+        });
+        stp.append(minus, num, plus); ab.append(lab, stp, info, save); upd();
+      }
+    }
+    renderTeam();
+    $('compCard').hidden = !owner || b.plan === 'founder' || b.source === 'comp';
+  }
+  async function choosePlan(plan) {
+    var b = bill, paid = b.source === 'stripe';
+    var t = TIERS.filter(function (x) { return x.id === plan; })[0];
+    if (paid && !confirm('Switch to ' + t.name + ' ($' + t.price + '/month)? Stripe adjusts your next bill for the rest of this month.')) return;
+    try {
+      var r = await api('POST', { action: 'checkout', plan: plan, addons: paid ? b.addons : 0 });
+      if (r.url) { location.href = r.url; return; }
+      toast('You\'re now on ' + t.name + '.'); loadSettings(); load();
+    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t start that.'); }
+  }
+  function renderTeam() {
+    var b = bill, t = team, owner = b.role === 'owner';
+    $('teamLead').textContent = !owner ? 'You\'re working in ' + (t.owner.name || 'someone else') + '\'s account. Their plan covers you.'
+      : b.seats === 1 ? 'Your plan is for one person. Pro adds up to 5 users, Studio unlimited.'
+      : 'Teammates see and work on all your reviews, under their own names.';
+    var box = $('people'); box.innerHTML = '';
+    [{ userId: t.owner.userId, name: t.owner.name, owner: true }].concat(t.members).forEach(function (m) {
+      var row = el('div', 'person'); row.appendChild(CF.avatar(m.name || '?', 32));
+      var nm = el('div', 'nm', m.name || 'Teammate'); nm.appendChild(el('small', '', m.owner ? 'Owner' : 'Joined ' + fmtDate(m.joinedAt))); row.appendChild(nm);
+      if (owner && !m.owner) {
+        var rm = el('button', 'btn ghost', 'Remove'); rm.type = 'button';
+        rm.addEventListener('click', async function () { if (!confirm('Remove ' + (m.name || 'this teammate') + '? They lose access straight away.')) return; try { await api('POST', { action: 'remove_member', userId: m.userId }); loadSettings(); } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t remove them.'); } });
+        row.appendChild(rm);
+      }
+      box.appendChild(row);
+    });
+    var acts = $('teamActs'); acts.innerHTML = '';
+    var f = el('div', 'row-form');
+    if (owner) {
+      var full = b.seats !== null && t.used >= b.seats;
+      var inv = el('button', 'btn', full ? 'Seats full' : 'Invite a teammate'); inv.type = 'button'; inv.disabled = full;
+      if (full && b.seats > 1) f.appendChild(el('span', 'sub2', 'Upgrade to Studio for unlimited users, or remove someone.'));
+      inv.addEventListener('click', async function () {
+        try {
+          var r = await api('POST', { action: 'invite' });
+          var row = el('div', 'copy-row'); row.style.flex = '1 1 100%';
+          var i = el('input'); i.readOnly = true; i.value = r.url; i.setAttribute('aria-label', 'Invite link');
+          var c = el('button', 'btn', 'Copy'); c.type = 'button';
+          c.addEventListener('click', async function () { try { await navigator.clipboard.writeText(r.url); toast('Invite link copied. It works once, for 7 days.'); } catch (e) { i.select(); } });
+          row.append(i, c); acts.appendChild(row); i.select();
+        } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t make an invite.'); }
+      });
+      f.prepend(inv);
+    } else {
+      var lv = el('button', 'btn ghost', 'Leave this team'); lv.type = 'button';
+      lv.addEventListener('click', leave);
+      f.appendChild(lv);
+    }
+    acts.appendChild(f);
+  }
+  async function leave() {
+    if (!confirm('Leave this team? You\'ll lose access to its reviews until you\'re invited again.')) return;
+    try { await api('POST', { action: 'leave' }); toast('You left the team.'); st.list = null; location.hash = ''; load(); } catch (e) { toast('Couldn\'t leave right now.'); }
+  }
+  function seatBlocked() {
+    $('setView').hidden = true; $('libView').hidden = false; $('rvView').hidden = true; $('app').hidden = false;
+    var box = $('assets'); box.innerHTML = '';
+    var d = el('div', 'blocked'); d.appendChild(el('h2', '', 'This team is out of seats'));
+    d.appendChild(el('div', '', 'The account you\'re in has more people than its plan allows, so you can\'t get in right now. Ask the owner to upgrade or free up a seat, or leave the team to use your own account.'));
+    var lv = el('button', 'btn ghost', 'Leave this team'); lv.type = 'button'; lv.addEventListener('click', leave); d.appendChild(lv);
+    box.appendChild(d);
+  }
+  async function join(code) {
+    try {
+      await api('POST', { action: 'join', code: code });
+      toast('You\'ve joined the team.');
+    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t join that team.'); }
+    st.list = null; history.replaceState(null, '', location.pathname); close();
+  }
+  $('redeemForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    try { await api('POST', { action: 'redeem', code: $('redeemCode').value }); $('redeemCode').value = ''; toast('Done. You\'re on Pro, free with your CreativeFlow plan.'); loadSettings(); load(); }
+    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t use that code.'); }
+  });
+  // founder: comp codes for CreativeFlow monthly clients
+  async function loadComps() {
+    $('founderCard').hidden = false;
+    var box = $('compList'); box.innerHTML = '';
+    var r; try { r = await api('POST', { action: 'comp_list' }); } catch (e) { return; }
+    r.codes.forEach(function (c) {
+      var row = el('div', 'person'); var nm = el('div', 'nm', c.code); nm.style.fontFamily = 'ui-monospace, monospace';
+      nm.appendChild(el('small', '', 'Not used yet · ' + (c.note || 'no note') + ' · made ' + fmtDate(c.created))); row.appendChild(nm);
+      var cp = el('button', 'btn ghost', 'Copy'); cp.type = 'button';
+      cp.addEventListener('click', function () { var t = 'Your FlowReview Pro code: ' + c.code + '\nSign in at ' + location.origin + '/#settings and enter it under "CreativeFlow monthly client?".'; navigator.clipboard.writeText(t).then(function () { toast('Code and instructions copied.'); }, function () { prompt('Copy this:', t); }); });
+      var del = el('button', 'btn ghost', 'Delete'); del.type = 'button';
+      del.addEventListener('click', async function () { await api('POST', { action: 'comp_revoke', code: c.code }); loadComps(); });
+      row.append(cp, del); box.appendChild(row);
+    });
+    r.comped.forEach(function (c) {
+      var row = el('div', 'person'); row.appendChild(CF.avatar(c.name || '?', 32));
+      var nm = el('div', 'nm', c.name || 'Unnamed account'); nm.appendChild(el('small', '', 'Pro free · ' + (c.note || 'no note') + ' · since ' + fmtDate(c.at))); row.appendChild(nm);
+      var rv = el('button', 'btn danger', 'Revoke'); rv.type = 'button';
+      rv.addEventListener('click', async function () { if (!confirm('Take free Pro away from ' + (c.name || 'this account') + '?')) return; await api('POST', { action: 'comp_revoke', owner: c.owner }); loadComps(); });
+      row.appendChild(rv); box.appendChild(row);
+    });
+    if (!r.codes.length && !r.comped.length) box.appendChild(el('div', 'empty', 'No codes yet.'));
+  }
+  $('compForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    try { await api('POST', { action: 'comp_create', note: $('compNote').value }); $('compNote').value = ''; toast('Code made. Copy it from the list below.'); loadComps(); }
+    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t make a code.'); }
+  });
+  $('burger2').addEventListener('click', function () { $('app').classList.toggle('menu-open'); });
+
   // ------------------------------------------------ start
   function refresh() { if (document.hidden || uploading) return; if (st.open) open(st.open, true); else load(); }
   async function startApp() {
@@ -872,8 +1194,16 @@
     player.video.addEventListener('timeupdate', function () { $('atTime').textContent = fmt(player.time()); if (!player.video.paused) { st.activeId = null; highlight(); } });
     $('landing').hidden = true; $('loading').hidden = true; $('app').hidden = false;
     renderLibrary();
+    // back from Stripe Checkout
+    var cs = new URLSearchParams(location.search).get('checkout');
+    if (cs) {
+      try { await api('POST', { action: 'checkout_done', sessionId: cs }); toast('Payment done. Your plan is active.'); } catch (e) { toast('Payment received. Your plan will show in a moment.'); }
+      history.replaceState(null, '', location.pathname + location.hash);
+    }
     var ok = await load();
     if (ok && st.account && !st.account.name) askName(true);
+    var pending = null; try { pending = localStorage.getItem('fr.plan'); } catch (e) {}
+    if (pending && !location.hash) location.hash = 'settings';
     route();
     // New client comments show up while the page is open.
     setInterval(refresh, 30000);
@@ -887,7 +1217,7 @@
   document.querySelectorAll('[data-signup],[data-signin]').forEach(function (b) {
     b.addEventListener('click', function () {
       if (!clerk) { toast('Sign-in is still loading. One moment.'); return; }
-      var opts = { appearance: appearance, forceRedirectUrl: location.origin + '/', fallbackRedirectUrl: location.origin + '/' };
+      var opts = { appearance: appearance, forceRedirectUrl: location.href, fallbackRedirectUrl: location.href };
       if (b.hasAttribute('data-signup')) clerk.openSignUp(opts); else clerk.openSignIn(opts);
     });
   });
