@@ -14,9 +14,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/app.css">
 <style>
-  .brand{ flex: none; font-weight: 800; font-size: 16px; letter-spacing: -0.035em; text-decoration: none; padding-right: 4px; }
-  .brand span, .wordmark span{ color: var(--accent-ink); }
-  .wordmark{ font-weight: 800; font-size: 22px; letter-spacing: -0.035em; color: var(--text); }
+  .brand{ display: flex; align-items: center; gap: 8px; flex: none; font-weight: 800; font-size: 16px; letter-spacing: -0.035em; text-decoration: none; padding-right: 4px; }
+  .brand .wm, .wordmark .wm{ color: var(--text); }
+  .brand .wm span, .wordmark .wm span{ color: var(--accent-ink); }
+  .brand .logo{ width: 20px; height: auto; }
+  .wordmark .logo{ width: 28px; height: auto; }
+  .wordmark{ display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px; letter-spacing: -0.035em; color: var(--text); }
   .msg{ min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; text-align: center; }
   .msg .card{ max-width: 420px; display: grid; gap: 14px; justify-items: center; color: var(--text-dim); line-height: 1.55; }
     .msg .card strong{ color: var(--text); font-size: 18px; letter-spacing: -0.02em; }
@@ -32,11 +35,11 @@
 </head>
 <body>
 
-<div class="msg" id="msgView"><div class="card"><span class="wordmark">Flow<span>Review</span></span><strong id="msgTitle">Loading the review…</strong><span id="msgText"></span></div></div>
+<div class="msg" id="msgView"><div class="card"><span class="wordmark"><img class="logo" src="/logo.png" alt="" width="28" height="33"><span class="wm">Flow<span>Review</span></span></span><strong id="msgTitle">Loading the review…</strong><span id="msgText"></span></div></div>
 
 <div class="rv" id="app" hidden>
   <header class="rv-top">
-    <a class="brand" href="/" target="_blank" rel="noopener" aria-label="FlowReview">Flow<span>Review</span></a>
+    <a class="brand" href="/" target="_blank" rel="noopener" aria-label="FlowReview"><img class="logo" src="/logo.png" alt="" width="20" height="23"><span class="wm">Flow<span>Review</span></span></a>
     <div class="t"><h1 id="title"></h1><div class="sub" id="sub"></div></div>
     <select id="version" aria-label="Version"></select>
     <span class="pill" id="status"></span>
