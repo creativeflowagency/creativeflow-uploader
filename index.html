@@ -192,6 +192,10 @@
   .row-form input{ flex: 1 1 220px; }
   .kv{ margin-top: 14px; display: grid; gap: 10px; font-size: 14px; color: var(--text-dim); }
   .kv strong{ color: var(--text); }
+  .gum-row{ display: grid; grid-template-columns: 130px minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .gum-row b{ font-size: 14px; }
+  .gum-row .ok{ color: var(--good); font-size: 12px; font-weight: 700; }
+  @media (max-width: 760px){ .gum-row{ grid-template-columns: 1fr; } }
   .sb-plan{ display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 9px 10px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--ink-3); color: var(--text); font: 600 13px var(--font); cursor: pointer; text-align: left; }
   .sb-plan:hover{ background: var(--ink-4); }
   .sb-plan span{ color: var(--accent-ink); font-size: 12px; }
@@ -419,6 +423,8 @@
         <div class="plan-sum" id="planSum"></div>
         <div class="tiers" id="tiersApp"></div>
         <div class="addon-box" id="addonBox" hidden></div>
+        <div id="purchases"></div>
+        <form class="row-form" id="activateForm" hidden><input id="licenseKey" maxlength="64" placeholder="Bought on Gumroad? Paste the license key from your receipt" aria-label="Gumroad license key" autocomplete="off"><button class="btn ghost" type="submit">Activate</button><button class="btn ghost" type="button" id="recheckBtn">Refresh</button></form>
       </section>
       <section class="set-card">
         <h2>Team</h2>
@@ -439,6 +445,13 @@
           <div>Storage: <strong id="acctStorage"></strong></div>
         </div>
         <div class="row-form"><button class="btn ghost" type="button" id="acctRename">Change name</button><button class="btn ghost" type="button" id="acctOut">Sign out</button></div>
+      </section>
+      <section class="set-card" id="gumCard" hidden>
+        <h2>Gumroad setup (only you see this)</h2>
+        <p class="lead2">Make one <b>membership</b> product per row in Gumroad (monthly, with "Generate a unique license key per sale" turned on), then paste its link and product ID here.</p>
+        <div id="gumRows"></div>
+        <div class="kv"><div>Gumroad → Settings → Advanced → <strong>Ping</strong>: paste this address so purchases switch plans on by themselves.</div></div>
+        <div class="copy-row" style="margin-top:8px"><input id="pingUrl" readonly aria-label="Ping address"><button class="btn" type="button" id="pingCopy">Copy</button></div>
       </section>
       <section class="set-card" id="founderCard" hidden>
         <h2>Comp codes (only you see this)</h2>
@@ -563,8 +576,13 @@
     seat_limit: 'Your plan\'s seats are full. Upgrade or remove a teammate.',
     over_storage: 'You\'re using more storage than that would allow. Delete some videos first.',
     over_seats: 'That plan has fewer seats than your team. Remove teammates first.',
-    billing_not_configured: 'Billing is still being set up. Try again soon.',
-    billing_error: 'The payment provider couldn\'t do that. Try again in a minute.',
+    billing_not_configured: 'Plans can\'t be bought just yet. Try again soon.',
+    plan_first: 'Choose a plan first, then add extra storage.',
+    bad_license: 'That license key wasn\'t found for a FlowReview plan. Copy it from your Gumroad receipt.',
+    license_in_use: 'That license key is already on another FlowReview account.',
+    gumroad_unreachable: 'Couldn\'t reach Gumroad. Try again in a minute.',
+    bad_product_id: 'That doesn\'t look like a Gumroad product ID.',
+    bad_product_url: 'Paste the product\'s Gumroad link, like https://you.gumroad.com/l/flowreview-pro.',
     owner_only: 'Only the account owner can change that.',
     no_subscription: 'There\'s no paid plan on this account yet.',
     bad_code: 'That code isn\'t valid or was already used.',
@@ -1008,18 +1026,18 @@
     } catch (e) { if (e.code === 'seat_limit') { seatBlocked(); return; } toast(ERRORS[e.code] || 'Couldn\'t load your settings.'); return; }
     addonDraft = bill.addons || 0;
     renderAccount(); renderSettings();
-    if (bill.isFounder) loadComps();
+    if (bill.isFounder) { loadComps(); loadGumroadSetup(); }
     // came from "Choose Pro" on the pricing page before signing up
     var pending = null; try { pending = localStorage.getItem('fr.plan'); localStorage.removeItem('fr.plan'); } catch (e) {}
     if (pending && RANK[pending] !== undefined && bill.role === 'owner' && bill.plan !== pending && bill.ready && bill.plan !== 'founder') choosePlan(pending);
   }
   function fmtDate(ms) { return ms ? new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
   function renderSettings() {
-    var b = bill, a = st.account, owner = b.role === 'owner', paid = b.source === 'stripe';
+    var b = bill, a = st.account, owner = b.role === 'owner', paid = b.source === 'gumroad';
     // notices
     var n = $('billNotice'), msg = '';
-    if (!b.ready && owner && b.plan !== 'founder') msg = 'Billing is being set up. Plans can be chosen shortly.';
-    if (paid && b.status === 'past_due') msg = 'Your last payment didn\'t go through. Update your card in Manage billing to keep your plan.';
+    if (!b.ready && owner && b.plan !== 'founder') msg = 'Plans can be bought shortly. They\'re being set up.';
+    if (owner && (b.purchases || []).some(function (x) { return !x.active && x.reason === 'payment_failed'; })) msg = 'A Gumroad payment didn\'t go through. Update your card on Gumroad to keep your plan.';
     n.hidden = !msg; n.textContent = msg;
     // summary
     var sum = $('planSum'); sum.innerHTML = '';
@@ -1027,16 +1045,10 @@
     p1.appendChild(el('span', 'big', b.plan === 'founder' ? 'Founder' : b.plan ? b.planName : 'No plan yet'));
     var line = b.plan === 'founder' ? 'Everything included, no limits.'
       : b.source === 'comp' ? 'Free with your CreativeFlow monthly plan.'
-      : paid ? '$' + (TIERS.filter(function (t) { return t.id === b.plan; })[0].price + (b.addons || 0) * 5) + '/month' + (b.cancelAtPeriodEnd ? ' · cancels on ' + fmtDate(b.periodEnd) : b.periodEnd ? ' · renews ' + fmtDate(b.periodEnd) : '')
+      : paid ? '$' + (TIERS.filter(function (t) { return t.id === b.plan; })[0].price + (b.addons || 0) * 5) + '/month, billed by Gumroad'
       : 'Pick a plan below to start uploading.';
     if (!owner) line = 'You\'re on ' + (team && team.owner.name ? team.owner.name + '\'s' : 'the account owner\'s') + ' plan. Only they can change billing.';
     p1.appendChild(el('span', 'sub2', line));
-    if (owner && b.hasCustomer && b.ready) {
-      var acts = el('div', 'acts2'), m = el('button', 'btn ghost', 'Manage billing'); m.type = 'button';
-      m.title = 'Card, invoices and cancelling (on Stripe)';
-      m.addEventListener('click', async function () { m.disabled = true; try { var r = await api('POST', { action: 'portal' }); location.href = r.url; } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t open billing.'); m.disabled = false; } });
-      acts.appendChild(m); p1.appendChild(acts);
-    }
     var p2 = el('div'); p2.appendChild(el('span', 'lbl', 'Storage'));
     p2.appendChild(el('span', 'big', size(a.used)));
     p2.appendChild(el('span', 'sub2', a.quota === null ? 'No limit' : 'of ' + size(a.quota) + (b.addons ? ' (includes ' + b.addons * 50 + ' GB extra)' : '')));
@@ -1059,37 +1071,44 @@
     ab.hidden = !owner || b.plan === 'founder';
     ab.innerHTML = '';
     if (!ab.hidden) {
-      if (!paid) { ab.innerHTML = 'Need more room? After choosing a plan you can add storage in <b>50 GB</b> blocks for <b>$5/month</b> each.'; }
+      if (!b.plan) { ab.innerHTML = 'Need more room? After choosing a plan you can add storage in <b>50 GB</b> blocks for <b>$5/month</b> each.'; }
       else {
-        var lab = el('span'); lab.innerHTML = 'Extra storage: <b>50 GB</b> blocks at <b>$5/month</b> each';
-        var stp = el('span', 'stepper'), minus = el('button', '', '−'), plus = el('button', '', '+'), num = el('span', '', String(addonDraft));
-        minus.type = plus.type = 'button'; minus.setAttribute('aria-label', 'One less'); plus.setAttribute('aria-label', 'One more');
-        var info = el('span', '', '');
-        var save = el('button', 'btn', 'Save'); save.type = 'button';
-        function upd() { num.textContent = addonDraft; info.textContent = '= ' + addonDraft * 50 + ' GB extra, $' + addonDraft * 5 + '/month'; save.disabled = addonDraft === (b.addons || 0); }
-        minus.addEventListener('click', function () { addonDraft = Math.max(0, addonDraft - 1); upd(); });
-        plus.addEventListener('click', function () { addonDraft = Math.min(200, addonDraft + 1); upd(); });
-        save.addEventListener('click', async function () {
-          if (!confirm('Change extra storage to ' + addonDraft * 50 + ' GB ($' + addonDraft * 5 + '/month)? Stripe adjusts your next bill for the rest of this month.')) return;
-          save.disabled = true;
-          try { await api('POST', { action: 'change_plan', addons: addonDraft }); toast('Storage updated.'); loadSettings(); }
-          catch (e) { toast(ERRORS[e.code] || 'Couldn\'t change that.'); save.disabled = false; }
-        });
-        stp.append(minus, num, plus); ab.append(lab, stp, info, save); upd();
+        var lab = el('span'); lab.innerHTML = 'Extra storage: <b>' + (b.addons ? b.addons * 50 + ' GB' : 'none') + '</b>. Each 50 GB block is a separate <b>$5/month</b> Gumroad membership.';
+        var more = el('button', 'btn', 'Add 50 GB'); more.type = 'button'; more.disabled = !b.storageReady;
+        more.addEventListener('click', function () { goGumroad('storage'); });
+        ab.append(lab, more);
       }
     }
+    // Gumroad memberships on this account
+    var pb = $('purchases'); pb.innerHTML = '';
+    if (owner && (b.purchases || []).length) {
+      pb.appendChild(el('div', 'sb-label', 'Your Gumroad memberships'));
+      b.purchases.forEach(function (x) {
+        var row = el('div', 'person'), nm = el('div', 'nm', x.name);
+        var why = { cancelled: 'cancelled', ended: 'ended', payment_failed: 'payment failed', refunded: 'refunded', chargebacked: 'charged back', disputed: 'disputed' }[x.reason] || 'not active';
+        nm.appendChild(el('small', '', (x.active ? 'Active' : 'Not active: ' + why) + ' · key ' + x.key)); row.appendChild(nm);
+        var m = el('a', 'btn ghost', 'Manage on Gumroad'); m.href = x.manageUrl; m.target = '_blank'; m.rel = 'noopener';
+        row.appendChild(m); pb.appendChild(row);
+      });
+      var plansHeld = b.purchases.filter(function (x) { return x.active && RANK[x.item] !== undefined; });
+      if (plansHeld.length > 1) pb.appendChild(el('p', 'lead2', 'You have more than one plan membership. You get the best one. Cancel the others on Gumroad so you\'re not charged twice.'));
+    }
+    $('activateForm').hidden = !owner || b.plan === 'founder';
     renderTeam();
     $('compCard').hidden = !owner || b.plan === 'founder' || b.source === 'comp';
   }
-  async function choosePlan(plan) {
-    var b = bill, paid = b.source === 'stripe';
-    var t = TIERS.filter(function (x) { return x.id === plan; })[0];
-    if (paid && !confirm('Switch to ' + t.name + ' ($' + t.price + '/month)? Stripe adjusts your next bill for the rest of this month.')) return;
+  async function goGumroad(item) {
     try {
-      var r = await api('POST', { action: 'checkout', plan: plan, addons: paid ? b.addons : 0 });
-      if (r.url) { location.href = r.url; return; }
-      toast('You\'re now on ' + t.name + '.'); loadSettings(); load();
-    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t start that.'); }
+      var r = await api('POST', { action: 'checkout', plan: item });
+      try { sessionStorage.setItem('fr.paying', '1'); } catch (e) {}
+      location.href = r.url;
+    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t open checkout.'); }
+  }
+  function choosePlan(plan) {
+    var paid = bill && bill.source === 'gumroad';
+    var t = TIERS.filter(function (x) { return x.id === plan; })[0];
+    if (paid && !confirm('Switch to ' + t.name + ' ($' + t.price + '/month)? You\'ll pay on Gumroad. Afterwards, cancel your old ' + bill.planName + ' membership on Gumroad so you\'re not charged for both.')) return;
+    goGumroad(plan);
   }
   function renderTeam() {
     var b = bill, t = team, owner = b.role === 'owner';
@@ -1150,6 +1169,21 @@
     } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t join that team.'); }
     st.list = null; history.replaceState(null, '', location.pathname); close();
   }
+  $('activateForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var k = $('licenseKey').value.trim(); if (!k) { $('licenseKey').focus(); return; }
+    try { var r = await api('POST', { action: 'activate', licenseKey: k }); $('licenseKey').value = ''; toast(r.ok ? 'Activated. Your plan is on.' : 'Found it, but that membership isn\'t active.'); loadSettings(); load(); }
+    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t activate that key.'); }
+  });
+  $('recheckBtn').addEventListener('click', async function () {
+    try { await api('POST', { action: 'recheck' }); toast('Checked with Gumroad.'); loadSettings(); load(); } catch (e) { toast('Couldn\'t check right now.'); }
+  });
+  // Coming back from paying on Gumroad: the plan usually shows within a minute.
+  window.addEventListener('pageshow', function () {
+    var paying = false; try { paying = sessionStorage.getItem('fr.paying') === '1'; sessionStorage.removeItem('fr.paying'); } catch (e) {}
+    if (paying && started) { toast('Welcome back. If your plan isn\'t showing yet, give it a minute or tap Refresh.'); setTimeout(loadSettings, 4000); }
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && started && !$('setView').hidden) loadSettings(); });
   $('redeemForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     try { await api('POST', { action: 'redeem', code: $('redeemCode').value }); $('redeemCode').value = ''; toast('Done. You\'re on Pro, free with your CreativeFlow plan.'); loadSettings(); load(); }
@@ -1178,6 +1212,25 @@
     });
     if (!r.codes.length && !r.comped.length) box.appendChild(el('div', 'empty', 'No codes yet.'));
   }
+  async function loadGumroadSetup() {
+    var r; try { r = await api('POST', { action: 'gumroad_setup' }); } catch (e) { return; }
+    $('gumCard').hidden = false; $('pingUrl').value = r.pingUrl;
+    var box = $('gumRows'); box.innerHTML = '';
+    [['starter', 'Starter · $15/mo'], ['pro', 'Pro · $39/mo'], ['studio', 'Studio · $99/mo'], ['storage', 'Extra 50 GB · $5/mo']].forEach(function (it) {
+      var cur = r.products[it[0]] || {}, row = el('form', 'gum-row');
+      var lb = el('div'); lb.appendChild(el('b', '', it[1])); if (cur.id && cur.url) { lb.appendChild(document.createElement('br')); lb.appendChild(el('span', 'ok', '✓ Connected')); }
+      var u = el('input'); u.placeholder = 'Product link, e.g. https://you.gumroad.com/l/flowreview-' + it[0]; u.value = cur.url || ''; u.setAttribute('aria-label', it[1] + ' link');
+      var i = el('input'); i.placeholder = 'Product ID'; i.value = cur.id || ''; i.setAttribute('aria-label', it[1] + ' product ID');
+      var sv = el('button', 'btn ghost', 'Save'); sv.type = 'submit';
+      row.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        try { await api('POST', { action: 'gumroad_set', item: it[0], url: u.value, id: i.value }); toast('Saved.'); loadGumroadSetup(); }
+        catch (err) { toast(ERRORS[err.code] || 'Couldn\'t save that.'); }
+      });
+      row.append(lb, u, i, sv); box.appendChild(row);
+    });
+  }
+  $('pingCopy').addEventListener('click', function () { navigator.clipboard.writeText($('pingUrl').value).then(function () { toast('Ping address copied.'); }, function () { $('pingUrl').select(); }); });
   $('compForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     try { await api('POST', { action: 'comp_create', note: $('compNote').value }); $('compNote').value = ''; toast('Code made. Copy it from the list below.'); loadComps(); }
@@ -1194,12 +1247,6 @@
     player.video.addEventListener('timeupdate', function () { $('atTime').textContent = fmt(player.time()); if (!player.video.paused) { st.activeId = null; highlight(); } });
     $('landing').hidden = true; $('loading').hidden = true; $('app').hidden = false;
     renderLibrary();
-    // back from Stripe Checkout
-    var cs = new URLSearchParams(location.search).get('checkout');
-    if (cs) {
-      try { await api('POST', { action: 'checkout_done', sessionId: cs }); toast('Payment done. Your plan is active.'); } catch (e) { toast('Payment received. Your plan will show in a moment.'); }
-      history.replaceState(null, '', location.pathname + location.hash);
-    }
     var ok = await load();
     if (ok && st.account && !st.account.name) askName(true);
     var pending = null; try { pending = localStorage.getItem('fr.plan'); } catch (e) {}
