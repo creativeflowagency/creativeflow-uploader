@@ -681,6 +681,7 @@
       return false;
     }
     $('setupNotice').hidden = st.ready;
+    if (!st.ready && r.missing && r.missing.length) $('setupNotice').textContent = 'Video storage isn\'t on yet. The server can\'t see these Netlify settings: ' + r.missing.join(', ') + '. Add them, then redeploy.';
     renderAccount(); renderNav(); renderLibrary();
     return true;
   }
