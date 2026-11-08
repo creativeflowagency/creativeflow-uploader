@@ -280,6 +280,23 @@
   .stage-empty .ring{ width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
   .stage-empty .ring svg{ width: 30px; height: 30px; }
   .stage-empty strong{ color: var(--text); font-size: 18px; letter-spacing: -0.02em; }
+  dialog.ask{ width: min(420px, calc(100vw - 32px)); text-align: center; padding: 28px 24px 22px; }
+  dialog.ask[open]{ animation: askIn 0.16s ease-out; }
+  dialog.ask::backdrop{ background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+  @keyframes askIn{ from{ opacity: 0; transform: translateY(8px) scale(0.98); } to{ opacity: 1; transform: none; } }
+  .ask-ico{ width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+  .ask-ico svg{ width: 26px; height: 26px; }
+  dialog.ask.danger .ask-ico{ background: var(--bad-soft); color: var(--bad); box-shadow: 0 0 0 8px rgba(255,143,143,0.06); }
+  dialog.ask h2{ font-size: 20px; overflow-wrap: anywhere; }
+  dialog.ask p{ margin: 8px 0 0; }
+  .ask-list{ list-style: none; margin: 16px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--ink); text-align: left; display: grid; gap: 8px; font-size: 13.5px; color: var(--text-dim); }
+  .ask-list li{ display: flex; align-items: center; gap: 10px; }
+  .ask-list svg{ width: 16px; height: 16px; flex: none; color: var(--bad); }
+  dialog.ask .row{ margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  dialog.ask .row .btn{ width: 100%; padding: 12px 14px; }
+  .btn.bad{ background: #e5484d; color: #fff; }
+  .btn.bad:hover{ background: #cf3d42; }
+  @media (prefers-reduced-motion: reduce){ dialog.ask[open]{ animation: none; } }
   .drop{ position: fixed; inset: 16px; z-index: 60; border: 2px dashed var(--accent-ink); border-radius: 16px; background: rgba(14,15,19,0.88); display: grid; place-content: center; text-align: center; gap: 6px; font-size: 22px; font-weight: 800; pointer-events: none; }
   .drop span{ font-size: 14px; font-weight: 500; color: var(--text-dim); }
   .file-btn input{ display: none; }
@@ -533,6 +550,14 @@
     <label class="field">Client (optional)<input id="newClient" maxlength="120" placeholder="e.g. Sparkxs"></label>
     <div class="row"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn" type="submit" id="newSubmit">Create review</button></div>
   </form>
+</dialog>
+
+<dialog id="askDlg" class="ask" aria-labelledby="askTitle" aria-describedby="askText">
+  <div class="ask-ico" id="askIco" aria-hidden="true"></div>
+  <h2 id="askTitle"></h2>
+  <p id="askText"></p>
+  <ul class="ask-list" id="askList" hidden></ul>
+  <div class="row"><button class="btn ghost" type="button" id="askNo">Cancel</button><button class="btn" type="button" id="askYes"></button></div>
 </dialog>
 
 <dialog id="shareDlg">
@@ -912,6 +937,34 @@
   $('noteText').addEventListener('focus', function () { player.video.pause(); });
   $('at').addEventListener('click', function () { player.video.pause(); $('noteText').focus(); });
 
+  // A FlowReview-styled "are you sure?" pop-up. ask({ title, text, items, yes, danger, icon, work }) -> Promise<boolean>.
+  // With `work` (an async function), the pop-up stays open showing progress until it finishes.
+  function ask(o) {
+    var d = $('askDlg');
+    d.className = 'ask' + (o.danger ? ' danger' : '');
+    $('askIco').innerHTML = o.icon || (o.danger ? I.trash : I.badge);
+    $('askTitle').textContent = o.title; $('askText').textContent = o.text || '';
+    var list = $('askList'); list.innerHTML = ''; list.hidden = !(o.items && o.items.length);
+    (o.items || []).forEach(function (t) { var li = el('li'); li.innerHTML = I.x; li.appendChild(el('span', '', t)); list.appendChild(li); });
+    var yes = $('askYes'), no = $('askNo');
+    yes.textContent = o.yes || 'OK'; yes.className = 'btn' + (o.danger ? ' bad' : ''); yes.disabled = no.disabled = false;
+    return new Promise(function (resolve) {
+      var busy = false;
+      function done(v) { cleanup(); if (d.open) d.close(); resolve(v); }
+      function onYes() {
+        if (!o.work) return done(true);
+        busy = true; yes.disabled = no.disabled = true; yes.textContent = o.busy || 'Working…';
+        Promise.resolve(o.work()).then(function () { busy = false; done(true); }, function (e) { busy = false; yes.disabled = no.disabled = false; yes.textContent = o.yes || 'OK'; toast((e && ERRORS[e.code]) || 'That didn\'t work. Try again.'); });
+      }
+      function onNo() { if (!busy) done(false); }
+      function onCancel(e) { e.preventDefault(); onNo(); }
+      function onBackdrop(e) { if (e.target === d) onNo(); }
+      function cleanup() { yes.removeEventListener('click', onYes); no.removeEventListener('click', onNo); d.removeEventListener('cancel', onCancel); d.removeEventListener('click', onBackdrop); }
+      yes.addEventListener('click', onYes); no.addEventListener('click', onNo); d.addEventListener('cancel', onCancel); d.addEventListener('click', onBackdrop);
+      d.showModal(); no.focus();
+    });
+  }
+
   // share + more menu
   function openShare(p) { $('shareUrl').value = link(p); $('shareOpen').href = link(p); $('shareDlg').showModal(); $('shareUrl').select(); }
   $('shareBtn').addEventListener('click', function () { if (st.project) openShare(st.project); });
@@ -932,8 +985,18 @@
     $('newTitle').value = st.project.title; $('newClient').value = st.project.client || ''; $('newDlg').showModal();
   });
   $('mDelete').addEventListener('click', async function () {
-    if (!st.project || !confirm('Delete "' + st.project.title + '"? Its videos, comments and client link are removed for good.')) return;
-    try { await api('POST', { action: 'delete', id: st.open }); toast('Review deleted.'); go(''); } catch (e) { toast('Couldn\'t delete it.'); }
+    var p = st.project; if (!p) return;
+    var vids = p.versions.length, notes = st.comments.length;
+    var gone = await ask({
+      danger: true, title: 'Delete "' + p.title + '"?',
+      text: 'This can\'t be undone. Everything in this review is removed for good:',
+      items: [vids ? vids + ' video version' + (vids === 1 ? '' : 's') + (vids ? ' (' + size(p.versions.reduce(function (a, v) { return a + (v.size || 0); }, 0)) + ')' : '') : 'No videos uploaded yet',
+        notes ? notes + ' comment' + (notes === 1 ? '' : 's') : 'No comments yet',
+        'The client link stops working' + (p.client ? ' for ' + p.client : '')],
+      yes: 'Delete review', busy: 'Deleting…',
+      work: function () { return api('POST', { action: 'delete', id: st.open }); }
+    });
+    if (gone) { toast('"' + p.title + '" was deleted.'); go(''); }
   });
 
   // ------------------------------------------------ uploading: straight from this browser to storage, with progress
