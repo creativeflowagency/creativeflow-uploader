@@ -74,6 +74,15 @@ dialog .row{ display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap
 .menu .danger{ color: var(--bad); }
 .menu .danger svg{ color: var(--bad); }
 
+/* account button + menu (top right) */
+  .acct-btn{ width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 2px solid var(--line-strong); background: none; cursor: pointer; display: grid; place-items: center; flex: none; }
+  .acct-btn:hover{ border-color: var(--accent-ink); }
+  .acct-btn .avatar{ width: 100% !important; height: 100% !important; font-size: 12px !important; }
+  .menu-head{ display: flex; align-items: center; gap: 10px; padding: 8px 10px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .menu-head .who{ min-width: 0; display: grid; }
+  .menu-head b{ font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .menu-head span.e{ font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 /* ---------- review screen (editor + client) ---------- */
 .rv{ display: grid; grid-template-rows: auto 1fr; height: 100vh; height: 100dvh; }
 .rv-top{ display: flex; align-items: center; gap: 12px; min-height: var(--top-h); padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); border-bottom: 1px solid var(--line); background: var(--ink-2); }

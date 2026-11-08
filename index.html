@@ -507,6 +507,7 @@
       <label class="btn ghost file-btn" id="upBtn"><span class="ic"></span><span class="hide-sm">Upload version</span><input type="file" id="file" accept="video/mp4,video/quicktime,video/webm,video/x-m4v"></label>
       <button class="btn" type="button" id="shareBtn"></button>
       <button class="icon-btn" type="button" id="moreBtn" aria-label="More" aria-haspopup="menu"></button>
+      <button class="acct-btn" type="button" id="rvAcct" aria-label="Your account" aria-haspopup="menu" aria-expanded="false"></button>
     </div>
   </header>
   <div class="rv-body">
@@ -536,6 +537,12 @@
   <div class="drop" id="drop" hidden>Drop to upload<span>It becomes the next version</span></div>
 </div>
 
+<div class="menu" id="acctMenu" role="menu" hidden>
+  <div class="menu-head" id="acctHead"></div>
+  <button type="button" id="aLib" role="menuitem"></button>
+  <button type="button" id="aSet" role="menuitem"></button>
+  <button type="button" class="danger" id="aOut" role="menuitem"></button>
+</div>
 <div class="menu" id="moreMenu" role="menu" hidden>
   <a id="mView" target="_blank" rel="noopener" role="menuitem"></a>
   <button type="button" id="mRename" role="menuitem"></button>
@@ -624,6 +631,7 @@
   $('burger').innerHTML = I.menu; $('searchIco').innerHTML = I.search; $('back').innerHTML = I.arrowLeft;
   $('upBtn').querySelector('.ic').innerHTML = I.upload; $('shareBtn').innerHTML = I.share + '<span>Share</span>';
   $('moreBtn').innerHTML = I.more; $('burger2').innerHTML = I.menu; $('noVideoIco').innerHTML = I.upload; $('atIco').innerHTML = I.clock;
+  $('aLib').innerHTML = I.grid + 'All reviews'; $('aSet').innerHTML = I.edit + 'Settings & billing'; $('aOut').innerHTML = I.arrowLeft + 'Log out';
   $('mView').innerHTML = I.eye + 'Open client view'; $('mRename').innerHTML = I.edit + 'Rename'; $('mDelete').innerHTML = I.trash + 'Delete review';
   document.querySelectorAll('dialog [data-close]').forEach(function (b) { b.addEventListener('click', function () { b.closest('dialog').close(); }); });
 
@@ -661,6 +669,11 @@
     var av = $('meAvatar'); av.innerHTML = '';
     if (u && u.hasImage && u.imageUrl) { var s = el('span', 'avatar'); var img = el('img'); img.src = u.imageUrl; img.alt = ''; s.appendChild(img); av.appendChild(s); }
     else av.appendChild(CF.avatar(myName(), 30));
+    // the account button on the review screen, and its menu
+    var mk = function (px) { if (u && u.hasImage && u.imageUrl) { var w = el('span', 'avatar'); var im = el('img'); im.src = u.imageUrl; im.alt = ''; w.appendChild(im); return w; } return CF.avatar(myName(), px); };
+    $('rvAcct').innerHTML = ''; $('rvAcct').appendChild(mk(32));
+    var h = $('acctHead'); h.innerHTML = ''; h.appendChild(mk(32));
+    var who = el('div', 'who'); who.appendChild(el('b', '', myName())); who.appendChild(el('span', 'e', email || 'Signed in')); h.appendChild(who);
     var sp = $('sbPlan');
     sp.className = 'sb-plan' + (a.plan ? '' : ' none');
     sp.innerHTML = '';
@@ -685,9 +698,24 @@
   $('me').addEventListener('click', function () { closeMenu(); location.hash = 'settings'; });
   $('sbPlan').addEventListener('click', function () { closeMenu(); location.hash = 'settings'; });
   $('acctRename').addEventListener('click', function () { askName(false); });
-  $('acctOut').addEventListener('click', async function () {
+  async function signOut() {
     try { localStorage.removeItem(HINT); } catch (e) {}
     try { await clerk.signOut({ redirectUrl: location.origin + '/' }); } catch (e) { location.href = '/'; }
+  }
+  $('acctOut').addEventListener('click', signOut);
+  // account menu on the review screen
+  function placeMenu(m, btn) { var r = btn.getBoundingClientRect(); m.hidden = false; m.style.top = (r.bottom + window.scrollY + 6) + 'px'; m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.right - m.offsetWidth)) + 'px'; }
+  $('rvAcct').addEventListener('click', function (e) {
+    e.stopPropagation(); $('moreMenu').hidden = true;
+    var m = $('acctMenu'); if (!m.hidden) { m.hidden = true; $('rvAcct').setAttribute('aria-expanded', 'false'); return; }
+    placeMenu(m, $('rvAcct')); $('rvAcct').setAttribute('aria-expanded', 'true');
+  });
+  document.addEventListener('click', function () { $('acctMenu').hidden = true; $('rvAcct').setAttribute('aria-expanded', 'false'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { $('acctMenu').hidden = true; $('moreMenu').hidden = true; } });
+  $('aLib').addEventListener('click', function () { go(''); });
+  $('aSet').addEventListener('click', function () { location.hash = 'settings'; });
+  $('aOut').addEventListener('click', async function () {
+    if (await ask({ title: 'Log out of FlowReview?', text: 'You can log back in any time. Your reviews stay as they are.', yes: 'Log out', icon: I.arrowLeft })) signOut();
   });
 
   // ------------------------------------------------ library (all reviews)
@@ -973,7 +1001,7 @@
     catch (e) { $('shareUrl').select(); document.execCommand('copy'); toast('Link copied.'); }
   });
   $('moreBtn').addEventListener('click', function (e) {
-    e.stopPropagation();
+    e.stopPropagation(); $('acctMenu').hidden = true;
     var m = $('moreMenu'); if (!m.hidden) { m.hidden = true; return; }
     var r = $('moreBtn').getBoundingClientRect();
     m.hidden = false; m.style.top = (r.bottom + window.scrollY + 6) + 'px'; m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px';

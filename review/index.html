@@ -27,8 +27,11 @@
   .made b{ color: var(--text-dim); }
   .made:hover b{ color: var(--text); }
   .decide{ display: flex; gap: 8px; }
+  .acct{ display: flex; align-items: center; flex: none; }
+  .acct .btn{ padding: 8px 14px; }
   @media (max-width: 600px){
     .decide{ order: 10; width: 100%; }
+    .acct{ order: 5; margin-left: auto; }
     .decide .btn{ flex: 1; }
   }
 </style>
@@ -47,6 +50,10 @@
     <div class="decide" id="decide">
       <button class="btn ghost" type="button" id="changesBtn">Needs changes</button>
       <button class="btn good" type="button" id="approveBtn"></button>
+    </div>
+    <div class="acct" id="acctBox">
+      <button class="btn ghost" type="button" id="loginBtn" hidden>Log in</button>
+      <button class="acct-btn" type="button" id="acctBtn" aria-label="Your account" aria-haspopup="menu" aria-expanded="false" hidden></button>
     </div>
   </header>
   <div class="rv-body">
@@ -67,6 +74,12 @@
       <a class="made" href="/" target="_blank" rel="noopener">Made with <b>FlowReview</b></a>
     </aside>
   </div>
+</div>
+
+<div class="menu" id="acctMenu" role="menu" hidden>
+  <div class="menu-head" id="acctHead"></div>
+  <a href="/" id="aApp" role="menuitem"></a>
+  <button type="button" class="danger" id="aOut" role="menuitem"></button>
 </div>
 
 <dialog id="nameDlg">
@@ -114,7 +127,7 @@
     if (st.name) { then(); return; }
     afterName = then;
     document.querySelectorAll('#nameWhy .ed').forEach(function (s) { s.textContent = editor(); });
-    $('nameInput').value = ''; $('nameDlg').showModal(); setTimeout(function () { $('nameInput').focus(); }, 30);
+    $('nameInput').value = clerkName(); $('nameDlg').showModal(); setTimeout(function () { $('nameInput').focus(); }, 30);
   }
   $('nameForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -255,6 +268,49 @@
   });
   $('approveBtn').addEventListener('click', function () { decide('approved'); });
   $('changesBtn').addEventListener('click', function () { decide('changes'); });
+
+  // ---- log in / log out (top right). Watching and commenting never need an account.
+  var CLERK_KEY = 'pk_live_Y2xlcmsuY3JlYXRpdmVmbG93Lm1lZGlhJA', clerk = null;
+  var appearance = { variables: { colorPrimary: '#5C2FE0', colorBackground: '#17181F', colorText: '#F3F2EE', colorTextSecondary: '#B4B3BB', colorInputBackground: '#0E0F13', colorInputText: '#F3F2EE', fontFamily: '"Plus Jakarta Sans", Helvetica, Arial, sans-serif', borderRadius: '10px' } };
+  $('aApp').innerHTML = I.grid + 'Open FlowReview'; $('aOut').innerHTML = I.arrowLeft + 'Log out';
+  function clerkName() { var u = clerk && clerk.user; return u ? (u.fullName || u.firstName || '') : ''; }
+  function renderAcct() {
+    var u = clerk && clerk.user;
+    $('loginBtn').hidden = !!u || !clerk; $('acctBtn').hidden = !u;
+    if (!u) { $('acctMenu').hidden = true; return; }
+    var email = (u.primaryEmailAddress && u.primaryEmailAddress.emailAddress) || '';
+    var nm = clerkName() || email || 'You';
+    var mk = function () { if (u.hasImage && u.imageUrl) { var w = el('span', 'avatar'); var im = el('img'); im.src = u.imageUrl; im.alt = ''; w.appendChild(im); return w; } return CF.avatar(nm, 32); };
+    $('acctBtn').innerHTML = ''; $('acctBtn').appendChild(mk());
+    var h = $('acctHead'); h.innerHTML = ''; h.appendChild(mk());
+    var who = el('div', 'who'); who.appendChild(el('b', '', nm)); who.appendChild(el('span', 'e', email || 'Signed in')); h.appendChild(who);
+  }
+  $('loginBtn').addEventListener('click', function () { if (clerk) clerk.openSignIn({ appearance: appearance, forceRedirectUrl: location.href, fallbackRedirectUrl: location.href }); });
+  $('acctBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var m = $('acctMenu'); if (!m.hidden) { m.hidden = true; $('acctBtn').setAttribute('aria-expanded', 'false'); return; }
+    var r = $('acctBtn').getBoundingClientRect();
+    m.hidden = false; m.style.top = (r.bottom + window.scrollY + 6) + 'px'; m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.right - m.offsetWidth)) + 'px';
+    $('acctBtn').setAttribute('aria-expanded', 'true');
+  });
+  document.addEventListener('click', function () { $('acctMenu').hidden = true; $('acctBtn').setAttribute('aria-expanded', 'false'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $('acctMenu').hidden = true; });
+  $('aOut').addEventListener('click', async function () {
+    $('acctMenu').hidden = true;
+    try { await clerk.signOut({ redirectUrl: location.href }); } catch (e) {}
+    renderAcct(); toast('Logged out. You can still watch and comment here.');
+  });
+  (function loadClerk() {
+    var api = atob(CLERK_KEY.split('_')[2]).slice(0, -1);
+    var s = document.createElement('script');
+    s.src = 'https://' + api + '/npm/@clerk/clerk-js@5/dist/clerk.browser.js'; s.async = true; s.crossOrigin = 'anonymous'; s.dataset.clerkPublishableKey = CLERK_KEY;
+    s.onload = async function () {
+      try { clerk = typeof window.Clerk === 'function' ? new window.Clerk(CLERK_KEY) : window.Clerk; await clerk.load({ appearance: appearance }); } catch (e) { clerk = null; $('acctBox').hidden = true; return; }
+      renderAcct(); clerk.addListener(renderAcct);
+    };
+    s.onerror = function () { $('acctBox').hidden = true; };
+    document.head.appendChild(s);
+  })();
 
   if (!/^[0-9a-f]{32}$/.test(token)) { message('This link isn\'t complete', 'Open the full link you were sent.'); return; }
   load(true);
