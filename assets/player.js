@@ -143,7 +143,11 @@
     });
     ['timeupdate', 'progress', 'durationchange', 'seeked'].forEach(function (ev) { video.addEventListener(ev, paint); });
     ['play', 'pause', 'ended'].forEach(function (ev) { video.addEventListener(ev, state); });
-    video.addEventListener('loadedmetadata', function () { paint(); drawMarks(); });
+    video.addEventListener('loadedmetadata', function () {
+      // the player's shape follows the video (used on phones; see app.css)
+      if (video.videoWidth && video.videoHeight) root.style.setProperty('--cfp-ar', video.videoWidth + ' / ' + video.videoHeight);
+      paint(); drawMarks();
+    });
 
     // keyboard shortcuts, except while typing
     document.addEventListener('keydown', function (e) {

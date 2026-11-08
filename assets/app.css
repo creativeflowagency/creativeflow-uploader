@@ -147,7 +147,8 @@ dialog .row{ display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap
 /* ---------- player ---------- */
 .cfp{ position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cfp-screen{ position: relative; flex: 1; min-height: 0; display: grid; place-items: center; background: #000; overflow: hidden; }
-.cfp-screen video{ width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
+/* the video is pinned to the box and scaled to fit inside it, whatever its shape (wide, vertical, square) */
+.cfp-screen video{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
 .cfp-big{ position: absolute; left: 50%; top: 50%; width: 68px; height: 68px; margin: -34px 0 0 -34px; border-radius: 50%; border: 0; background: rgba(14,15,19,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: grid; place-items: center; cursor: pointer; transition: transform 0.12s ease, opacity 0.15s ease; }
 .cfp-big:hover{ transform: scale(1.06); }
 .cfp-big svg{ width: 26px; height: 26px; margin-left: 4px; color: #fff; }
@@ -175,13 +176,14 @@ dialog .row{ display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap
 .cfp-speed{ font: 700 12px var(--font); color: var(--text-dim); background: none; border: 1px solid var(--line-strong); border-radius: 6px; padding: 3px 7px; cursor: pointer; min-width: 42px; }
 .cfp-speed:hover{ color: var(--text); }
 .cfp:fullscreen{ background: #000; }
-.cfp:fullscreen .cfp-screen video{ height: 100%; }
+.cfp:fullscreen .cfp-screen{ flex: 1; aspect-ratio: auto; max-height: none; }
 
 @media (max-width: 900px){
   .rv{ height: auto; min-height: 100dvh; }
   .rv-body{ grid-template-columns: 1fr; }
   .rv-stage{ position: sticky; top: 0; z-index: 5; }
-  .cfp-screen{ flex: none; aspect-ratio: 16 / 9; }
+  /* phones: the player takes the video's own shape (set by player.js), but never taller than most of the screen */
+  .cfp-screen{ flex: none; aspect-ratio: var(--cfp-ar, 16 / 9); max-height: 55vh; max-height: 55svh; }
   .rv-side{ border-left: 0; border-top: 1px solid var(--line); }
   .cm-list{ overflow: visible; }
   .composer{ position: sticky; bottom: 0; z-index: 4; }
