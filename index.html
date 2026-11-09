@@ -280,6 +280,9 @@
   .stage-empty .ring{ width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
   .stage-empty .ring svg{ width: 30px; height: 30px; }
   .stage-empty strong{ color: var(--text); font-size: 18px; letter-spacing: -0.02em; }
+  .rv-progress{ position: relative; z-index: 3; }   /* above the empty-stage drop area */
+  .prog-top{ display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .prog-top .btn{ padding: 6px 12px; font-size: 12.5px; flex: none; }
   dialog.ask{ width: min(420px, calc(100vw - 32px)); text-align: center; padding: 28px 24px 22px; }
   dialog.ask[open]{ animation: askIn 0.16s ease-out; }
   dialog.ask::backdrop{ background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
@@ -512,13 +515,13 @@
   </header>
   <div class="rv-body">
     <div class="rv-stage">
-      <div class="rv-progress" id="progress" hidden><div id="progText">Uploading…</div><div class="bar"><span id="progBar"></span></div></div>
+      <div class="rv-progress" id="progress" hidden><div class="prog-top"><span id="progText">Uploading…</span><button class="btn ghost" type="button" id="progCancel">Cancel</button></div><div class="bar"><span id="progBar"></span></div></div>
       <div class="rv-banner" id="banner" hidden></div>
       <div id="player" class="cfp"></div>
       <div class="stage-empty" id="noVideo" hidden>
         <div class="ring" id="noVideoIco"></div>
         <strong>Drop your video here</strong>
-        <span>MP4, MOV or WebM, up to 5 GB. An H.264 MP4 plays on every device.</span>
+        <span>MP4, MOV or WebM, up to 50 GB. An H.264 MP4 plays on every device.</span>
         <label class="btn file-btn">Choose a video<input type="file" id="file2" accept="video/mp4,video/quicktime,video/webm,video/x-m4v"></label>
       </div>
     </div>
@@ -594,7 +597,8 @@
   var ERRORS = {
     not_configured: 'Video storage is still being set up. Try again soon.',
     not_video: 'That isn\'t a video file (MP4, MOV or WebM).',
-    too_big: 'That file is over 5 GB. Export a smaller review copy (an H.264 MP4 works well).',
+    too_big: 'That file is over 50 GB. Export a smaller review copy (an H.264 MP4 works well).',
+    upload_incomplete: 'Some of the video didn\'t arrive. Try again.',
     no_space: 'Not enough storage left. Delete an old review to free some up.',
     upload_missing: 'The upload didn\'t arrive. Try again.',
     missing_title: 'Give the video a name.',
@@ -975,7 +979,7 @@
     var list = $('askList'); list.innerHTML = ''; list.hidden = !(o.items && o.items.length);
     (o.items || []).forEach(function (t) { var li = el('li'); li.innerHTML = I.x; li.appendChild(el('span', '', t)); list.appendChild(li); });
     var yes = $('askYes'), no = $('askNo');
-    yes.textContent = o.yes || 'OK'; yes.className = 'btn' + (o.danger ? ' bad' : ''); yes.disabled = no.disabled = false;
+    yes.textContent = o.yes || 'OK'; no.textContent = o.no || 'Cancel'; yes.className = 'btn' + (o.danger ? ' bad' : ''); yes.disabled = no.disabled = false;
     return new Promise(function (resolve) {
       var busy = false;
       function done(v) { cleanup(); if (d.open) d.close(); resolve(v); }
@@ -1028,40 +1032,111 @@
   });
 
   // ------------------------------------------------ uploading: straight from this browser to storage, with progress
+  // Some browsers don't say what kind of file it is: tell from the name.
+  function videoType(file) {
+    if (/^video\/(mp4|quicktime|webm|x-m4v)$/.test(file.type)) return file.type;
+    var ext = (file.name.match(/\.([a-z0-9]+)$/i) || [])[1] || '';
+    return { mp4: 'video/mp4', mov: 'video/quicktime', qt: 'video/quicktime', m4v: 'video/x-m4v', webm: 'video/webm' }[ext.toLowerCase()] || '';
+  }
+  var upCtl = null;   // the upload in progress: { cancelled, xhrs }
+  function sendPart(url, blob, onProgress, ctl, contentType) {
+    return new Promise(function (resolve, reject) {
+      var x = new XMLHttpRequest(); ctl.xhrs.add(x);
+      x.open('PUT', url); if (contentType) x.setRequestHeader('Content-Type', contentType);
+      x.upload.onprogress = function (e) { if (e.lengthComputable) onProgress(e.loaded); };
+      x.onload = function () { ctl.xhrs.delete(x); x.status >= 200 && x.status < 300 ? resolve() : reject(Object.assign(new Error('upload'), { code: 'upload_' + x.status, status: x.status })); };
+      x.onerror = function () { ctl.xhrs.delete(x); reject(Object.assign(new Error('upload'), { code: 'upload_network' })); };
+      x.onabort = function () { ctl.xhrs.delete(x); reject(Object.assign(new Error('upload'), { code: 'cancelled' })); };
+      x.send(blob);
+    });
+  }
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  function online() { return navigator.onLine !== false ? Promise.resolve() : new Promise(function (r) { window.addEventListener('online', function on() { window.removeEventListener('online', on); r(); }); }); }
+  // A part is tried up to 6 times (waiting longer each time, and for the connection to come back).
+  async function sendPartWithRetries(url, blob, onProgress, ctl, contentType) {
+    var delays = [1000, 3000, 8000, 15000, 30000];
+    for (var attempt = 0; ; attempt++) {
+      if (ctl.cancelled) throw Object.assign(new Error('upload'), { code: 'cancelled' });
+      try { onProgress(0); return await sendPart(url, blob, onProgress, ctl, contentType); }
+      catch (e) {
+        if (e.code === 'cancelled' || e.status === 403 || attempt >= delays.length) throw e;
+        await wait(delays[attempt]); await online();
+      }
+    }
+  }
+  function fmtTime(sec) { if (!isFinite(sec) || sec <= 0) return ''; if (sec < 90) return 'under 2 min'; if (sec < 3600) return 'about ' + Math.round(sec / 60) + ' min'; return 'about ' + (sec / 3600).toFixed(1) + ' hours'; }
+
   async function upload(file) {
     if (!file || !st.open) return;
     if (uploading) { toast('One upload at a time. Wait for this one to finish.'); return; }
-    if (!/^video\/(mp4|quicktime|webm|x-m4v)$/.test(file.type)) { toast(ERRORS.not_video); return; }
+    var type = videoType(file);
+    if (!type) { toast(ERRORS.not_video); return; }
     if (st.account && file.size > st.account.maxVideo) { toast(ERRORS.too_big); return; }
     var id = st.open, prog = $('progress'), bar = $('progBar'), txt = $('progText');
+    var ctl = upCtl = { cancelled: false, xhrs: new Set(), key: null };
+    var lock = null; try { if (navigator.wakeLock) lock = await navigator.wakeLock.request('screen'); } catch (e) {}   // keep the phone awake
     uploading = true;
+    var started = Date.now(), sent = 0;
+    function show(done) {
+      sent = done; var p = Math.min(1, done / file.size); bar.style.width = (p * 100).toFixed(1) + '%';
+      var secs = (Date.now() - started) / 1000, rate = done / Math.max(secs, 0.5), left = (file.size - done) / Math.max(rate, 1);
+      txt.textContent = 'Uploading ' + file.name + ': ' + Math.round(p * 100) + '% (' + size(done) + ' of ' + size(file.size) + ')' +
+        (secs > 4 && rate > 0 ? ' · ' + size(rate) + '/s · ' + fmtTime(left) + ' left' : '') + '. Keep this page open.';
+    }
     try {
-      var s = await api('POST', { action: 'upload', id: id, filename: file.name, type: file.type, size: file.size });
-      prog.hidden = false; bar.style.width = '0%'; txt.textContent = 'Uploading ' + file.name + '…';
-      await new Promise(function (resolve, reject) {
-        var x = new XMLHttpRequest();
-        x.open('PUT', s.url); x.setRequestHeader('Content-Type', s.contentType);
-        x.upload.onprogress = function (e) {
-          if (!e.lengthComputable) return;
-          var p = e.loaded / e.total; bar.style.width = (p * 100).toFixed(1) + '%';
-          txt.textContent = 'Uploading ' + file.name + ': ' + Math.round(p * 100) + '% (' + size(e.loaded) + ' of ' + size(e.total) + '). Keep this page open.';
+      var s = await api('POST', { action: 'upload', id: id, filename: file.name, type: type, size: file.size });
+      ctl.key = s.key;
+      prog.hidden = false; bar.style.width = '0%'; show(0);
+      if (s.multipart) {
+        // big file: equal parts, 4 at a time, each retried on its own
+        var urls = s.multipart.urls, ps = s.multipart.partSize, loaded = new Array(urls.length).fill(0);
+        var tick = function () { show(loaded.reduce(function (a, b) { return a + b; }, 0)); };
+        var sendList = async function (list) {
+          var next = 0;
+          async function worker() {
+            while (next < list.length) {
+              var i = list[next++];
+              await sendPartWithRetries(urls[i], file.slice(i * ps, Math.min(file.size, (i + 1) * ps)), function (n) { loaded[i] = n; tick(); }, ctl);
+            }
+          }
+          await Promise.all([worker(), worker(), worker(), worker()]);
         };
-        x.onload = function () { x.status >= 200 && x.status < 300 ? resolve() : reject(Object.assign(new Error('upload'), { code: 'upload_' + x.status })); };
-        x.onerror = function () { reject(Object.assign(new Error('upload'), { code: 'upload_network' })); };
-        x.send(file);
-      });
-      txt.textContent = 'Finishing…';
-      await api('POST', { action: 'finish', id: id, key: s.key, filename: file.name, type: file.type });
+        await sendList(urls.map(function (_, i) { return i; }));
+        txt.textContent = 'Finishing…';
+        try { await api('POST', { action: 'finish', id: id, key: s.key, filename: file.name, type: type }); }
+        catch (e) {
+          if (e.code !== 'upload_incomplete') throw e;
+          // a part went missing on the way: send everything again once, then finish
+          await sendList(urls.map(function (_, i) { return i; }));
+          await api('POST', { action: 'finish', id: id, key: s.key, filename: file.name, type: type });
+        }
+      } else {
+        await sendPartWithRetries(s.url, file, show, ctl, s.contentType);
+        txt.textContent = 'Finishing…';
+        await api('POST', { action: 'finish', id: id, key: s.key, filename: file.name, type: type });
+      }
       prog.hidden = true; toast('Uploaded. Your client sees it on their link now.');
       if (st.open === id) open(id);
       load();
     } catch (e) {
       prog.hidden = true;
-      if (e.code === 'no_plan') { toast(ERRORS.no_plan); uploading = false; location.hash = 'settings'; return; }
-      toast(ERRORS[e.code] || (e.code === 'upload_network' ? 'The upload stopped. Check your connection and try again.' : 'Upload failed. Try again.'));
+      ctl.xhrs.forEach(function (x) { try { x.abort(); } catch (er) {} });
+      if (ctl.key && e.code !== 'cancelled') api('POST', { action: 'upload_cancel', key: ctl.key }).catch(function () {});
+      if (e.code === 'cancelled') toast('Upload cancelled.');
+      else if (e.code === 'no_plan') { toast(ERRORS.no_plan); location.hash = 'settings'; }
+      else toast(ERRORS[e.code] || (e.code === 'upload_network' ? 'The upload stopped: the connection dropped several times. Check your Wi-Fi and try again.'
+        : e.code === 'upload_403' ? 'The upload link ran out. Try again.' : 'Upload failed (' + (e.code || 'error') + '). Try again.'));
     }
-    uploading = false;
+    try { if (lock) lock.release(); } catch (e) {}
+    uploading = false; upCtl = null;
   }
+  $('progCancel').addEventListener('click', async function () {
+    var ctl = upCtl; if (!ctl) return;
+    if (!(await ask({ danger: true, title: 'Cancel this upload?', text: 'What\'s been sent so far is thrown away. You can upload it again any time.', yes: 'Cancel upload', no: 'Keep uploading', icon: I.x }))) return;
+    ctl.cancelled = true;
+    ctl.xhrs.forEach(function (x) { try { x.abort(); } catch (e) {} });
+    if (ctl.key) api('POST', { action: 'upload_cancel', key: ctl.key }).catch(function () {});
+  });
   ['file', 'file2'].forEach(function (fid) { $(fid).addEventListener('change', function () { var f = $(fid).files[0]; $(fid).value = ''; upload(f); }); });
   var drag = 0;
   var isFiles = function (e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0; };
