@@ -640,6 +640,13 @@
     own_invite: 'That\'s your own invite link. Send it to a teammate.'
   };
   var $ = function (id) { return document.getElementById(id); };
+  // A known problem gets its plain-English message; anything else keeps a short code at the end
+  // (e.g. "Couldn't delete it. (server_error)") so it can be looked up.
+  function errMsg(e, fallback) {
+    var code = (e && e.code) || 'error';
+    if (ERRORS[code]) return ERRORS[code];
+    return fallback.replace(/\.?$/, '') + ' (' + code + ')';
+  }
   var clerk = null, started = false, uploading = false, player = null;
   var st = { list: null, account: null, ready: true, open: null, project: null, comments: [], version: 0, filter: 'all', q: '', activeId: null };
 
@@ -710,7 +717,7 @@
     e.preventDefault();
     var name = $('nameInput').value.trim(); if (!name) return;
     try { var r = await api('POST', { action: 'account', name: name }); st.account = r.account; renderAccount(); renderAs(); $('nameDlg').close(); toast('Saved. Clients see you as ' + st.account.name + '.'); }
-    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t save that.'); }
+    catch (err) { toast(errMsg(err, 'Couldn\'t save that.')); }
   });
   $('me').addEventListener('click', function () { closeMenu(); location.hash = 'settings'; });
   $('sbPlan').addEventListener('click', function () { closeMenu(); location.hash = 'settings'; });
@@ -747,7 +754,7 @@
     try { var r = await api('GET'); st.list = r.projects; st.account = r.account; st.ready = r.ready; st.role = r.role; }
     catch (e) {
       if (e.code === 'seat_limit') { seatBlocked(); return false; }
-      if (!st.list) { $('assets').innerHTML = ''; $('assets').appendChild(el('div', 'empty', ERRORS[e.code] || 'Couldn\'t load your reviews.')); }
+      if (!st.list) { $('assets').innerHTML = ''; $('assets').appendChild(el('div', 'empty', errMsg(e, 'Couldn\'t load your reviews.'))); }
       return false;
     }
     $('setupNotice').hidden = st.ready;
@@ -850,7 +857,7 @@
         var r = await api('POST', { action: 'create', title: $('newTitle').value, client: $('newClient').value });
         $('newDlg').close(); go(r.project.id); load();
       }
-    } catch (err) { toast(ERRORS[err.code] || 'Couldn\'t save that.'); }
+    } catch (err) { toast(errMsg(err, 'Couldn\'t save that.')); }
     btn.disabled = false;
   });
 
@@ -873,7 +880,7 @@
     if (fresh) { window.scrollTo(0, 0); $('dTitle').textContent = 'Loading…'; $('dSub').textContent = ''; $('dStatus').hidden = true; $('dVersion').hidden = true; st.version = 0; st.activeId = null; $('notes').innerHTML = ''; }
     var r;
     try { r = await api('POST', { action: 'get', id: id }); }
-    catch (e) { if (!keep) { toast(e.code === 'http_404' || e.code === 'not_found' ? 'That review doesn\'t exist any more.' : ERRORS[e.code] || 'Couldn\'t open that review.'); go(''); } return; }
+    catch (e) { if (!keep) { toast(e.code === 'http_404' || e.code === 'not_found' ? 'That review doesn\'t exist any more.' : errMsg(e, 'Couldn\'t open that review.')); go(''); } return; }
     if (st.open !== id) return;
     st.project = r.project; st.comments = r.comments;
     var p = st.project;
@@ -933,7 +940,7 @@
         e.stopPropagation();
         if (!confirm('Delete this comment?')) return;
         try { await api('POST', { action: 'delete_comment', id: st.open, commentId: c.id }); st.comments = st.comments.filter(function (y) { return y.id !== c.id; }); renderNotes(); }
-        catch (err) { toast('Couldn\'t delete it.'); }
+        catch (err) { toast(errMsg(err, 'Couldn\'t delete it.')); }
       });
       head.appendChild(x);
       if (!mine) {
@@ -942,7 +949,7 @@
         chk.addEventListener('click', async function (e) {
           e.stopPropagation();
           try { var r = await api('POST', { action: 'done', id: st.open, commentId: c.id, done: !c.done }); c.done = r.comment.done; renderNotes(); }
-          catch (err) { toast('Couldn\'t update that comment.'); }
+          catch (err) { toast(errMsg(err, 'Couldn\'t update that comment.')); }
         });
         head.appendChild(chk);
       }
@@ -974,7 +981,7 @@
       var r = await api('POST', { action: 'comment', id: st.open, version: st.version, t: player.time(), text: text });
       st.comments.push(r.comment); st.comments.sort(function (a, b) { return (a.version - b.version) || (a.t - b.t); });
       $('noteText').value = ''; st.activeId = r.comment.id; renderNotes();
-    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t post the comment.'); }
+    } catch (e) { toast(errMsg(e, 'Couldn\'t post the comment.')); }
     btn.disabled = false;
   }
   $('post').addEventListener('click', post);
@@ -999,7 +1006,7 @@
       function onYes() {
         if (!o.work) return done(true);
         busy = true; yes.disabled = no.disabled = true; yes.textContent = o.busy || 'Working…';
-        Promise.resolve(o.work()).then(function () { busy = false; done(true); }, function (e) { busy = false; yes.disabled = no.disabled = false; yes.textContent = o.yes || 'OK'; toast((e && ERRORS[e.code]) || 'That didn\'t work. Try again.'); });
+        Promise.resolve(o.work()).then(function () { busy = false; done(true); }, function (e) { busy = false; yes.disabled = no.disabled = false; yes.textContent = o.yes || 'OK'; toast(errMsg(e, 'That didn\'t work. Try again.')); });
       }
       function onNo() { if (!busy) done(false); }
       function onCancel(e) { e.preventDefault(); onNo(); }
@@ -1203,7 +1210,7 @@
     try {
       var r = await Promise.all([api('POST', { action: 'billing' }), api('POST', { action: 'team' }), api('GET')]);
       bill = r[0]; team = r[1]; st.account = r[2].account; st.role = r[2].role; st.list = r[2].projects;
-    } catch (e) { if (e.code === 'seat_limit') { seatBlocked(); return; } toast(ERRORS[e.code] || 'Couldn\'t load your settings.'); return; }
+    } catch (e) { if (e.code === 'seat_limit') { seatBlocked(); return; } toast(errMsg(e, 'Couldn\'t load your settings.')); return; }
     addonDraft = bill.addons || 0;
     renderAccount(); renderSettings();
     if (bill.isFounder) { loadComps(); loadGumroadSetup(); $('checkCard').hidden = false; }
@@ -1282,7 +1289,7 @@
       var r = await api('POST', { action: 'checkout', plan: item });
       try { sessionStorage.setItem('fr.paying', '1'); } catch (e) {}
       location.href = r.url;
-    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t open checkout.'); }
+    } catch (e) { toast(errMsg(e, 'Couldn\'t open checkout.')); }
   }
   function choosePlan(plan) {
     var paid = bill && bill.source === 'gumroad';
@@ -1301,7 +1308,7 @@
       var nm = el('div', 'nm', m.name || 'Teammate'); nm.appendChild(el('small', '', m.owner ? 'Owner' : 'Joined ' + fmtDate(m.joinedAt))); row.appendChild(nm);
       if (owner && !m.owner) {
         var rm = el('button', 'btn ghost', 'Remove'); rm.type = 'button';
-        rm.addEventListener('click', async function () { if (!confirm('Remove ' + (m.name || 'this teammate') + '? They lose access straight away.')) return; try { await api('POST', { action: 'remove_member', userId: m.userId }); loadSettings(); } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t remove them.'); } });
+        rm.addEventListener('click', async function () { if (!confirm('Remove ' + (m.name || 'this teammate') + '? They lose access straight away.')) return; try { await api('POST', { action: 'remove_member', userId: m.userId }); loadSettings(); } catch (e) { toast(errMsg(e, 'Couldn\'t remove them.')); } });
         row.appendChild(rm);
       }
       box.appendChild(row);
@@ -1320,7 +1327,7 @@
           var c = el('button', 'btn', 'Copy'); c.type = 'button';
           c.addEventListener('click', async function () { try { await navigator.clipboard.writeText(r.url); toast('Invite link copied. It works once, for 7 days.'); } catch (e) { i.select(); } });
           row.append(i, c); acts.appendChild(row); i.select();
-        } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t make an invite.'); }
+        } catch (e) { toast(errMsg(e, 'Couldn\'t make an invite.')); }
       });
       f.prepend(inv);
     } else {
@@ -1346,14 +1353,14 @@
     try {
       await api('POST', { action: 'join', code: code });
       toast('You\'ve joined the team.');
-    } catch (e) { toast(ERRORS[e.code] || 'Couldn\'t join that team.'); }
+    } catch (e) { toast(errMsg(e, 'Couldn\'t join that team.')); }
     st.list = null; history.replaceState(null, '', location.pathname); close();
   }
   $('activateForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var k = $('licenseKey').value.trim(); if (!k) { $('licenseKey').focus(); return; }
     try { var r = await api('POST', { action: 'activate', licenseKey: k }); $('licenseKey').value = ''; toast(r.ok ? 'Activated. Your plan is on.' : 'Found it, but that membership isn\'t active.'); loadSettings(); load(); }
-    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t activate that key.'); }
+    catch (err) { toast(errMsg(err, 'Couldn\'t activate that key.')); }
   });
   $('recheckBtn').addEventListener('click', async function () {
     try { await api('POST', { action: 'recheck' }); toast('Checked with Gumroad.'); loadSettings(); load(); } catch (e) { toast('Couldn\'t check right now.'); }
@@ -1367,7 +1374,7 @@
   $('redeemForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     try { await api('POST', { action: 'redeem', code: $('redeemCode').value }); $('redeemCode').value = ''; toast('Done. You\'re on Pro, free with your CreativeFlow plan.'); loadSettings(); load(); }
-    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t use that code.'); }
+    catch (err) { toast(errMsg(err, 'Couldn\'t use that code.')); }
   });
   // founder: comp codes for CreativeFlow monthly clients
   async function loadComps() {
@@ -1405,7 +1412,7 @@
       row.addEventListener('submit', async function (e) {
         e.preventDefault();
         try { await api('POST', { action: 'gumroad_set', item: it[0], url: u.value, id: i.value }); toast('Saved.'); loadGumroadSetup(); }
-        catch (err) { toast(ERRORS[err.code] || 'Couldn\'t save that.'); }
+        catch (err) { toast(errMsg(err, 'Couldn\'t save that.')); }
       });
       row.append(lb, u, i, sv); box.appendChild(row);
     });
@@ -1438,7 +1445,7 @@
   $('compForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     try { await api('POST', { action: 'comp_create', note: $('compNote').value }); $('compNote').value = ''; toast('Code made. Copy it from the list below.'); loadComps(); }
-    catch (err) { toast(ERRORS[err.code] || 'Couldn\'t make a code.'); }
+    catch (err) { toast(errMsg(err, 'Couldn\'t make a code.')); }
   });
   $('burger2').addEventListener('click', function () { $('app').classList.toggle('menu-open'); });
 
