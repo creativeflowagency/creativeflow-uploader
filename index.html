@@ -192,6 +192,13 @@
   .row-form input{ flex: 1 1 220px; }
   .kv{ margin-top: 14px; display: grid; gap: 10px; font-size: 14px; color: var(--text-dim); }
   .kv strong{ color: var(--text); }
+  .chk{ display: flex; gap: 12px; align-items: flex-start; padding: 10px 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .chk .mark{ flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+  .chk.ok .mark{ background: var(--good-soft); color: var(--good); }
+  .chk.bad .mark{ background: var(--bad-soft); color: var(--bad); }
+  .chk b{ display: block; }
+  .chk span.d{ color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+  .chk.bad span.d{ color: var(--bad); }
   .gum-row{ display: grid; grid-template-columns: 130px minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .gum-row b{ font-size: 14px; }
   .gum-row .ok{ color: var(--good); font-size: 12px; font-weight: 700; }
@@ -465,6 +472,12 @@
           <div>Storage: <strong id="acctStorage"></strong></div>
         </div>
         <div class="row-form"><button class="btn ghost" type="button" id="acctRename">Change name</button><button class="btn ghost" type="button" id="acctOut">Sign out</button></div>
+      </section>
+      <section class="set-card" id="checkCard" hidden>
+        <h2>Check storage (only you see this)</h2>
+        <p class="lead2">Runs a real test upload (small and big) and shows exactly which step fails, if any.</p>
+        <div class="row-form"><button class="btn" type="button" id="checkBtn">Run check</button></div>
+        <div class="people" id="checkList"></div>
       </section>
       <section class="set-card" id="gumCard" hidden>
         <h2>Gumroad setup (only you see this)</h2>
@@ -1193,7 +1206,7 @@
     } catch (e) { if (e.code === 'seat_limit') { seatBlocked(); return; } toast(ERRORS[e.code] || 'Couldn\'t load your settings.'); return; }
     addonDraft = bill.addons || 0;
     renderAccount(); renderSettings();
-    if (bill.isFounder) { loadComps(); loadGumroadSetup(); }
+    if (bill.isFounder) { loadComps(); loadGumroadSetup(); $('checkCard').hidden = false; }
     // came from "Choose Pro" on the pricing page before signing up
     var pending = null; try { pending = localStorage.getItem('fr.plan'); localStorage.removeItem('fr.plan'); } catch (e) {}
     if (pending && RANK[pending] !== undefined && bill.role === 'owner' && bill.plan !== pending && bill.ready && bill.plan !== 'founder') choosePlan(pending);
@@ -1397,6 +1410,30 @@
       row.append(lb, u, i, sv); box.appendChild(row);
     });
   }
+  // founder: test the video storage end to end
+  function chkRow(name, ok, detail) {
+    var r = el('div', 'chk ' + (ok ? 'ok' : 'bad')), m = el('span', 'mark', ok ? '✓' : '✕'), t = el('div');
+    t.appendChild(el('b', '', name)); if (detail) t.appendChild(el('span', 'd', detail)); r.append(m, t); $('checkList').appendChild(r);
+  }
+  $('checkBtn').addEventListener('click', async function () {
+    var btn = $('checkBtn'); btn.disabled = true; btn.textContent = 'Checking…'; $('checkList').innerHTML = '';
+    try {
+      var r = await api('POST', { action: 'storage_check' });
+      r.steps.forEach(function (x) { chkRow(x.step, x.ok, x.detail); });
+      if (r.browserTest) {
+        try {
+          var res = await fetch(r.browserTest.url, { method: 'PUT', body: r.browserTest.body });
+          chkRow('Upload from this browser (CORS)', res.ok, res.ok ? 'works' : 'HTTP ' + res.status);
+        } catch (e) {
+          chkRow('Upload from this browser (CORS)', false, 'Blocked. In Cloudflare → R2 → cf-reviews → Settings → CORS Policy, AllowedOrigins must include ' + location.origin + ' and AllowedMethods must include PUT.');
+        }
+        api('POST', { action: 'storage_check_done', key: r.browserTest.key }).catch(function () {});
+      }
+      var bad = $('checkList').querySelectorAll('.chk.bad').length;
+      toast(bad ? bad + ' step' + (bad === 1 ? '' : 's') + ' failed. Send Claude a screenshot of this list.' : 'Everything works. Uploads should go through.');
+    } catch (e) { chkRow('Reach the server', false, (ERRORS[e.code] || e.code || 'error') + '. If this says bad_request, the server update isn\'t live yet: approve the deploy in Netlify.'); }
+    btn.disabled = false; btn.textContent = 'Run check';
+  });
   $('pingCopy').addEventListener('click', function () { navigator.clipboard.writeText($('pingUrl').value).then(function () { toast('Ping address copied.'); }, function () { $('pingUrl').select(); }); });
   $('compForm').addEventListener('submit', async function (e) {
     e.preventDefault();
