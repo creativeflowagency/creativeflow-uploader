@@ -63,7 +63,7 @@
     </div>
     <aside class="rv-side">
       <div class="th-box" id="thBox" hidden>
-        <div class="th-head"><h2>Thumbnails</h2><span class="count" id="thCount">0</span></div>
+        <div class="th-head"><h2>Thumbnails</h2></div>
         <div class="th-grid" id="thGrid"></div>
       </div>
       <div class="side-head"><h2>Comments</h2><span class="count" id="count">0</span><span class="grow"></span><label><input type="checkbox" id="hideDone">Hide done</label></div>
@@ -174,8 +174,7 @@
 
   // thumbnails the editor shared (e.g. options for the YouTube thumbnail): tap one to see it full size
   function renderThumbs(ts) {
-    $('thBox').hidden = !ts.length; $('thCount').textContent = ts.length;
-    var grid = $('thGrid'); grid.innerHTML = '';
+    $('thBox').hidden = !ts.length; var grid = $('thGrid'); grid.innerHTML = '';
     ts.slice().reverse().forEach(function (t) {
       var it = el('div', 'th-item'), ob = el('button', 'open'); ob.type = 'button'; ob.setAttribute('aria-label', 'View ' + (t.name || 'thumbnail'));
       var im = el('img'); im.src = t.url; im.alt = ''; im.loading = 'lazy'; ob.appendChild(im);

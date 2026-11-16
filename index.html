@@ -541,7 +541,7 @@
     </div>
     <aside class="rv-side">
       <div class="th-box" id="thBox">
-        <div class="th-head"><h2>Thumbnails</h2><span class="count" id="thCount">0</span><span class="grow"></span><label class="btn ghost file-btn" id="thAdd">Add<input type="file" id="thFile" accept="image/png,image/jpeg,image/webp" multiple></label></div>
+        <div class="th-head"><h2>Thumbnails</h2><span class="grow"></span><label class="btn ghost file-btn" id="thAdd">Add<input type="file" id="thFile" accept="image/png,image/jpeg,image/webp" multiple></label></div>
         <div class="th-grid" id="thGrid"></div>
       </div>
       <div class="side-head"><h2>Comments</h2><span class="count" id="count">0</span><span class="grow"></span><label><input type="checkbox" id="hideDone">Hide done</label></div>
@@ -912,7 +912,6 @@
   function renderThumbs() {
     var p = st.project; if (!p) return;
     var ts = p.thumbs || [], grid = $('thGrid'); grid.innerHTML = '';
-    $('thCount').textContent = ts.length;
     if (!ts.length) { grid.appendChild(el('div', 'th-empty', 'Add thumbnail options here (PNG, JPG or WebP). Your client sees them on their review link.')); grid.style.display = 'block'; return; }
     grid.style.display = '';
     ts.slice().reverse().forEach(function (t) {
