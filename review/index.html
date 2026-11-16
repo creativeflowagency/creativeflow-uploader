@@ -62,6 +62,10 @@
       <div id="player" class="cfp"></div>
     </div>
     <aside class="rv-side">
+      <div class="th-box" id="thBox" hidden>
+        <div class="th-head"><h2>Thumbnails</h2><span class="count" id="thCount">0</span></div>
+        <div class="th-grid" id="thGrid"></div>
+      </div>
       <div class="side-head"><h2>Comments</h2><span class="count" id="count">0</span><span class="grow"></span><label><input type="checkbox" id="hideDone">Hide done</label></div>
       <div class="cm-list" id="list"></div>
       <div class="composer">
@@ -81,6 +85,8 @@
   <a href="/" id="aApp" role="menuitem"></a>
   <button type="button" class="danger" id="aOut" role="menuitem"></button>
 </div>
+
+<dialog id="lightDlg" class="lightbox" aria-label="Thumbnail"><img id="lightImg" alt=""><div class="cap"><span id="lightName"></span><span class="grow"></span><button class="btn ghost" type="button" id="lightClose">Close</button></div></dialog>
 
 <dialog id="nameDlg">
   <form id="nameForm">
@@ -162,9 +168,23 @@
       sel.hidden = p.versions.length < 2;
       if (newVersion || !keep) pick(p.versions[p.versions.length - 1].n, true);
       else pick(keep, false);
-      renderAs();
+      renderAs(); renderThumbs(p.thumbs || []);
     }).catch(function () { if (first) message('Couldn\'t reach the server', 'Check your connection and reload the page.'); });
   }
+
+  // thumbnails the editor shared (e.g. options for the YouTube thumbnail): tap one to see it full size
+  function renderThumbs(ts) {
+    $('thBox').hidden = !ts.length; $('thCount').textContent = ts.length;
+    var grid = $('thGrid'); grid.innerHTML = '';
+    ts.slice().reverse().forEach(function (t) {
+      var it = el('div', 'th-item'), ob = el('button', 'open'); ob.type = 'button'; ob.setAttribute('aria-label', 'View ' + (t.name || 'thumbnail'));
+      var im = el('img'); im.src = t.url; im.alt = ''; im.loading = 'lazy'; ob.appendChild(im);
+      ob.addEventListener('click', function () { $('lightImg').src = t.url; $('lightImg').alt = t.name || 'Thumbnail'; $('lightName').textContent = t.name || 'Thumbnail'; $('lightDlg').showModal(); });
+      it.append(ob, el('span', 'nm', t.name || 'Thumbnail')); grid.appendChild(it);
+    });
+  }
+  $('lightClose').addEventListener('click', function () { $('lightDlg').close(); });
+  $('lightDlg').addEventListener('click', function (e) { if (e.target === $('lightDlg')) $('lightDlg').close(); });
 
   function setupPlayer() {
     player = CF.player($('player'));

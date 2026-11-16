@@ -260,6 +260,7 @@
   .asset{ position: relative; display: grid; gap: 10px; cursor: pointer; border-radius: 12px; outline-offset: 4px; }
   .thumb{ position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--ink-3); border: 1px solid var(--line); transition: border-color 0.12s ease; }
   .asset:hover .thumb{ border-color: var(--line-strong); }
+  .thumb img.cover{ width: 100%; height: 100%; object-fit: cover; display: block; }
   .thumb video{ width: 100%; height: 100%; object-fit: contain; display: block; background: #000; pointer-events: none; }
   .thumb .ph{ position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; }
   .thumb .ph svg{ width: 30px; height: 30px; }
@@ -539,6 +540,10 @@
       </div>
     </div>
     <aside class="rv-side">
+      <div class="th-box" id="thBox">
+        <div class="th-head"><h2>Thumbnails</h2><span class="count" id="thCount">0</span><span class="grow"></span><label class="btn ghost file-btn" id="thAdd">Add<input type="file" id="thFile" accept="image/png,image/jpeg,image/webp" multiple></label></div>
+        <div class="th-grid" id="thGrid"></div>
+      </div>
       <div class="side-head"><h2>Comments</h2><span class="count" id="count">0</span><span class="grow"></span><label><input type="checkbox" id="hideDone">Hide done</label></div>
       <div class="cm-list" id="notes"></div>
       <div class="composer">
@@ -574,6 +579,8 @@
     <div class="row"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn" type="submit" id="newSubmit">Create review</button></div>
   </form>
 </dialog>
+
+<dialog id="lightDlg" class="lightbox" aria-label="Thumbnail"><img id="lightImg" alt=""><div class="cap"><span id="lightName"></span><span class="grow"></span><button class="btn ghost" type="button" data-close>Close</button></div></dialog>
 
 <dialog id="askDlg" class="ask" aria-labelledby="askTitle" aria-describedby="askText">
   <div class="ask-ico" id="askIco" aria-hidden="true"></div>
@@ -611,6 +618,9 @@
     not_configured: 'Video storage is still being set up. Try again soon.',
     not_video: 'That isn\'t a video file (MP4, MOV or WebM).',
     too_big: 'That file is over 50 GB. Export a smaller review copy (an H.264 MP4 works well).',
+    not_image: 'Thumbnails must be PNG, JPG or WebP images.',
+    thumb_too_big: 'That image is over 15 MB.',
+    too_many_thumbs: 'That\'s the most thumbnails for one review (12). Delete one first.',
     upload_incomplete: 'Some of the video didn\'t arrive. Try again.',
     no_space: 'Not enough storage left. Delete an old review to free some up.',
     upload_missing: 'The upload didn\'t arrive. Try again.',
@@ -805,7 +815,9 @@
     shown.forEach(function (p) {
       var a = el('div', 'asset'); a.tabIndex = 0; a.setAttribute('role', 'link'); a.setAttribute('aria-label', 'Open ' + p.title);
       var th = el('div', 'thumb');
-      if (p.preview) {
+      if (p.cover) {
+        var ci = el('img'); ci.src = p.cover; ci.alt = ''; ci.loading = 'lazy'; ci.className = 'cover'; th.appendChild(ci);
+      } else if (p.preview) {
         var v = el('video'); v.muted = true; v.playsInline = true; v.preload = 'metadata'; v.src = p.preview + '#t=1';
         var d = el('span', 'b d', '');
         v.addEventListener('loadedmetadata', function () { if (isFinite(v.duration)) d.textContent = fmt(v.duration); });
@@ -892,8 +904,52 @@
     p.versions.slice().reverse().forEach(function (v) { var o = el('option', '', 'V' + v.n + (v.n === p.versions.length ? ' (latest)' : '') + ' · ' + v.filename); o.value = v.n; sel.appendChild(o); });
     sel.hidden = !p.versions.length;
     pick(keep && p.versions.some(function (v) { return v.n === st.version; }) ? st.version : p.versions.length, !keep);
-    renderAs();
+    renderAs(); renderThumbs();
   }
+  // ---- thumbnails: images the client sees next to the video (e.g. options for the YouTube thumbnail)
+  function lightbox(t) { $('lightImg').src = t.url; $('lightImg').alt = t.name || 'Thumbnail'; $('lightName').textContent = t.name || 'Thumbnail'; $('lightDlg').showModal(); }
+  $('lightDlg').addEventListener('click', function (e) { if (e.target === $('lightDlg')) $('lightDlg').close(); });
+  function renderThumbs() {
+    var p = st.project; if (!p) return;
+    var ts = p.thumbs || [], grid = $('thGrid'); grid.innerHTML = '';
+    $('thCount').textContent = ts.length;
+    if (!ts.length) { grid.appendChild(el('div', 'th-empty', 'Add thumbnail options here (PNG, JPG or WebP). Your client sees them on their review link.')); grid.style.display = 'block'; return; }
+    grid.style.display = '';
+    ts.slice().reverse().forEach(function (t) {
+      var it = el('div', 'th-item'), ob = el('button', 'open'); ob.type = 'button'; ob.setAttribute('aria-label', 'View ' + (t.name || 'thumbnail'));
+      var im = el('img'); im.src = t.url; im.alt = ''; im.loading = 'lazy'; ob.appendChild(im);
+      ob.addEventListener('click', function () { lightbox(t); });
+      var del = el('button', 'icon-btn del'); del.type = 'button'; del.innerHTML = I.x; del.setAttribute('aria-label', 'Delete ' + (t.name || 'thumbnail'));
+      del.addEventListener('click', async function () {
+        if (!(await ask({ danger: true, title: 'Delete this thumbnail?', text: '"' + (t.name || 'Thumbnail') + '" is removed from the client\'s link too.', yes: 'Delete', icon: I.trash }))) return;
+        try { var r = await api('POST', { action: 'thumb_delete', id: st.open, thumbId: t.id }); st.project.thumbs = r.project.thumbs; renderThumbs(); toast('Thumbnail deleted.'); }
+        catch (e) { toast(errMsg(e, 'Couldn\'t delete it.')); }
+      });
+      it.append(ob, el('span', 'nm', t.name || 'Thumbnail'), del); grid.appendChild(it);
+    });
+  }
+  async function uploadThumbs(files) {
+    var id = st.open; if (!id || !files.length) return;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { toast(f.name + ' isn\'t a PNG, JPG or WebP image.'); continue; }
+      if (f.size > 15 * 1024 * 1024) { toast(f.name + ' is over 15 MB.'); continue; }
+      toast('Uploading ' + f.name + '…');
+      try {
+        var s = await api('POST', { action: 'thumb_upload', id: id, type: f.type, size: f.size });
+        await sendPartWithRetries(s.url, f, function () {}, { cancelled: false, xhrs: new Set() }, s.contentType);
+        var r = await api('POST', { action: 'thumb_finish', id: id, key: s.key, name: f.name.replace(/\.[a-z0-9]+$/i, '') });
+        if (st.open === id) { st.project.thumbs = r.project.thumbs; renderThumbs(); }
+        toast('Thumbnail added. Your client sees it now.');
+      } catch (e) {
+        if (e.code === 'no_plan') { toast(ERRORS.no_plan); location.hash = 'settings'; return; }
+        toast(errMsg(e, 'Couldn\'t upload ' + f.name + '.'));
+      }
+    }
+    load();
+  }
+  $('thFile').addEventListener('change', function () { var fs = Array.prototype.slice.call($('thFile').files); $('thFile').value = ''; uploadThumbs(fs); });
+
   function close() {
     st.open = null; st.project = null;
     if (player) player.unload();
@@ -1163,7 +1219,12 @@
   $('rvView').addEventListener('dragenter', function (e) { if (isFiles(e)) { drag++; $('drop').hidden = false; } });
   $('rvView').addEventListener('dragleave', function () { drag = Math.max(0, drag - 1); if (!drag) $('drop').hidden = true; });
   $('rvView').addEventListener('dragover', function (e) { e.preventDefault(); });
-  $('rvView').addEventListener('drop', function (e) { e.preventDefault(); drag = 0; $('drop').hidden = true; upload(e.dataTransfer.files[0]); });
+  $('rvView').addEventListener('drop', function (e) {
+    e.preventDefault(); drag = 0; $('drop').hidden = true;
+    var fs = Array.prototype.slice.call(e.dataTransfer.files || []);
+    var imgs = fs.filter(function (f) { return /^image\//.test(f.type); });
+    if (imgs.length) uploadThumbs(imgs); else upload(fs[0]);
+  });
   window.addEventListener('beforeunload', function (e) { if (uploading) { e.preventDefault(); e.returnValue = ''; } });
 
   // ------------------------------------------------ plans (same as the server's lib/flowreview-billing.mjs)
