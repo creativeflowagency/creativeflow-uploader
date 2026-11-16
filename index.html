@@ -595,7 +595,7 @@
   <h2>Share with your client</h2>
   <p>Anyone with this link can watch, comment and approve this review. They never need an account.</p>
   <div class="copy-row"><input id="shareUrl" readonly aria-label="Client link"><button class="btn" type="button" id="shareCopy">Copy</button></div>
-  <div class="row" style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><a class="btn ghost" id="shareOpen" target="_blank" rel="noopener">Open client view</a><button class="btn ghost" type="button" data-close>Done</button></div>
+  <div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px"><button class="btn ghost" type="button" id="shareNew" style="margin-right:auto" title="Sent it to the wrong person? Turn this link off and get a new one">Make a new link</button><a class="btn ghost" id="shareOpen" target="_blank" rel="noopener">Open client view</a><button class="btn ghost" type="button" data-close>Done</button></div>
 </dialog>
 
 <dialog id="nameDlg">
@@ -1075,7 +1075,23 @@
   }
 
   // share + more menu
-  function openShare(p) { $('shareUrl').value = link(p); $('shareOpen').href = link(p); $('shareDlg').showModal(); $('shareUrl').select(); }
+  var shareP = null;
+  function openShare(p) { shareP = p; $('shareUrl').value = link(p); $('shareOpen').href = link(p); $('shareDlg').showModal(); $('shareUrl').select(); }
+  // Sent to the wrong person? A new link; the old one stops working straight away.
+  $('shareNew').addEventListener('click', async function () {
+    var p = shareP; if (!p) return;
+    $('shareDlg').close();
+    var fresh = null;
+    var ok = await ask({ title: 'Make a new link?', text: 'The link you sent before stops working straight away. Comments, versions and approvals all stay. Send the new link to ' + (p.client || 'your client') + '.', yes: 'Make new link', busy: 'Making…', icon: I.share,
+      work: async function () { fresh = (await api('POST', { action: 'new_link', id: p.id })).project; } });
+    if (!ok || !fresh) { openShare(p); return; }
+    p.token = fresh.token;
+    if (st.project && st.project.id === p.id) st.project.token = fresh.token;
+    (st.list || []).forEach(function (x) { if (x.id === p.id) x.token = fresh.token; });
+    if (st.open === p.id) $('mView').href = link(p);
+    openShare(p);
+    toast('New link made. The old one no longer works.');
+  });
   $('shareBtn').addEventListener('click', function () { if (st.project) openShare(st.project); });
   $('shareCopy').addEventListener('click', async function () {
     try { await navigator.clipboard.writeText($('shareUrl').value); toast('Link copied. Send it to ' + ((st.project && st.project.client) || 'your client') + '.'); $('shareDlg').close(); }
