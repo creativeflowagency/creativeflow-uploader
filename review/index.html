@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>/* never shown inside another site's frame (stops click-tricking) */ if (window.top !== window.self) { try { window.top.location = window.location.href; } catch (e) { document.documentElement.style.display = "none"; } }</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Review | FlowReview</title>
 <meta name="robots" content="noindex, nofollow">
@@ -249,7 +250,7 @@
       var btn = $('post'); btn.disabled = true;
       api({ action: 'comment', name: st.name, version: st.version, t: t, text: text }).then(function (r) {
         btn.disabled = false;
-        if (!r.ok) { toast(r.d.error && r.d.error.code === 'daily_limit' ? 'That\'s a lot of comments for one day. Try again tomorrow.' : 'Couldn\'t post that. Try again.'); return; }
+        if (!r.ok) { var ec = r.d.error && r.d.error.code; toast(ec === 'daily_limit' ? 'That\'s a lot of comments for one day. Try again tomorrow.' : ec === 'too_many_comments' ? 'This review is full of comments. Ask your editor to tidy it up.' : 'Couldn\'t post that. Try again.'); return; }
         $('noteText').value = '';
         st.comments.push(r.d.comment); st.comments.sort(function (a, b) { return (a.version - b.version) || (a.t - b.t); });
         if (st.project.status === 'approved') st.project.status = 'in_review';
